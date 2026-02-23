@@ -1,7 +1,7 @@
 ﻿@page
 @model TheRealBank.UI.Pages.ChatBot.ChatModel
 @{
-    ViewData["Title"] = "Chat IA";
+    ViewData["Title"] = "Agente Financeiro";
 }
 
 <style>
@@ -214,19 +214,61 @@
         align-items: center;
         justify-content: center;
     }
+
+    .quick-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .quick-action-btn {
+        background: #e9ecef;
+        border: 1px solid #dee2e6;
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-size: 13px;
+        color: #1a253c;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .quick-action-btn:hover {
+        background: #007bff;
+        color: #fff;
+        border-color: #007bff;
+    }
 </style>
 
 <div class="chat-container" style="position: relative;">
     <div class="chat-header">
-        <i class="fa-solid fa-robot"></i>
-        <h3>Chat com IA</h3>
-        <span>phi3:mini · Ollama</span>
+        <i class="fa-solid fa-building-columns"></i>
+        <h3>Agente Financeiro</h3>
+        <span>TheRealBank · IA</span>
     </div>
 
     <div class="chat-messages" id="chatMessages">
         <div class="message assistant">
             <div class="message-avatar">IA</div>
-            <div class="message-bubble">Olá! Eu sou o assistente de IA do TheRealBank. Como posso ajudá-lo?</div>
+            <div class="message-bubble">
+                Olá! 👋 Eu sou o <strong>Agente Financeiro do TheRealBank</strong>.
+
+Posso te ajudar com:
+💰 Consultar seu saldo
+🔑 Ver sua chave PIX
+📄 Consultar seus dados cadastrais
+🗺️ Te direcionar para qualquer seção do banco
+
+Como posso te ajudar hoje?
+                <div class="quick-actions">
+                    <button class="quick-action-btn" onclick="quickSend('Qual é o meu saldo?')">💰 Meu saldo</button>
+                    <button class="quick-action-btn" onclick="quickSend('Qual minha chave PIX?')">🔑 Chave PIX</button>
+                    <button class="quick-action-btn" onclick="quickSend('Onde fica o PIX?')">🗺️ Onde fica o PIX?</button>
+                    <button class="quick-action-btn" onclick="quickSend('Como pago um boleto?')">📄 Pagar boleto</button>
+                    <button class="quick-action-btn" onclick="quickSend('Quero ver meu extrato')">📊 Extrato</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -234,10 +276,10 @@
         <i class="fa-solid fa-chevron-down"></i>
     </button>
 
-    <div class="typing-indicator" id="typingIndicator">⏳ A IA está digitando...</div>
+    <div class="typing-indicator" id="typingIndicator">⏳ O agente está processando...</div>
 
     <div class="chat-input-area">
-        <input type="text" id="userInput" placeholder="Digite sua mensagem..." autocomplete="off" />
+        <input type="text" id="userInput" placeholder="Pergunte sobre saldo, PIX, boleto, extrato..." autocomplete="off" />
         <button id="stopBtn" onclick="stopResponse()">
             <i class="fa-solid fa-stop me-1"></i> Parar
         </button>
@@ -256,9 +298,16 @@
         const typingIndicator = document.getElementById('typingIndicator');
         const scrollDownBtn = document.getElementById('scrollDownBtn');
 
+        const userEmail = '@(Model.UserEmail ?? "")';
+
         let conversationHistory = [];
         let abortController = null;
         let userIsNearBottom = true;
+
+        if (userEmail) {
+            conversationHistory.push({ role: 'user', content: 'Meu e-mail é ' + userEmail });
+            conversationHistory.push({ role: 'assistant', content: 'Anotado! Vou usar seu e-mail para consultar seus dados quando necessário.' });
+        }
 
         chatMessages.addEventListener('scroll', function () {
             const threshold = 60;
@@ -300,6 +349,11 @@
             scrollIfNeeded();
 
             return bubble;
+        }
+
+        function quickSend(text) {
+            userInput.value = text;
+            sendMessage();
         }
 
         function stopResponse() {
@@ -390,7 +444,7 @@
                         assistantBubble.textContent = '⚠️ Resposta cancelada pelo usuário.';
                     }
                 } else {
-                    assistantBubble.textContent = '❌ Erro ao se comunicar com a IA. Verifique se o Ollama está rodando (ollama serve).';
+                    assistantBubble.textContent = '❌ Erro ao se comunicar com o agente. Verifique se o Ollama está rodando (ollama serve).';
                     console.error(error);
                 }
             } finally {

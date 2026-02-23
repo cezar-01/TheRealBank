@@ -9,6 +9,7 @@ namespace TheRealBank.Services
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<ICustomerService, CustomerService>();
+            services.AddScoped<BankPlugin>();
             services.AddScoped<OllamaChatService>();
             return services;
         }
