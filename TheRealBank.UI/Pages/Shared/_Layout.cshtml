@@ -65,7 +65,7 @@
                     </svg>
                     TheRealBank
                 </a>
-
+                <a class="offcanvas-dark-link" asp-page="/ChatBot/Chat"><i class="fa-solid fa-robot"></i> Chat IA</a>
                 <button class="navbar-toggler ms-auto d-sm-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainOffcanvas" aria-controls="mainOffcanvas" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -99,7 +99,6 @@
                         <a class="offcanvas-dark-link" asp-page="/Customers/AddCliente"><i class="fa-solid fa-user-plus"></i> Novo Cliente</a>
                     }
 
-                    <a class="offcanvas-dark-link" asp-page="/ChatBot/Chat"><i class="fa-solid fa-robot"></i> Chat IA</a>
                     <a class="offcanvas-dark-link" asp-page="/Privacy"><i class="fa-solid fa-shield-halved"></i> Privacidade</a>
 
                     @if (User?.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
