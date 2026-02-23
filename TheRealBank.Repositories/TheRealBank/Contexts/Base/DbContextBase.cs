@@ -41,6 +41,18 @@ namespace TheRealBank.Contexts.Base
                     .IsRequired();
             });
 
+            modelBuilder.Entity<TheRealBank.Entities.ChatConversation>(e =>
+            {
+                e.ToTable("ChatConversations");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.UserEmail).IsRequired().HasMaxLength(200);
+                e.Property(x => x.Title).IsRequired().HasMaxLength(200);
+                e.Property(x => x.MessagesJson).IsRequired().HasColumnType("longtext");
+                e.Property(x => x.CreatedAt).IsRequired();
+                e.Property(x => x.UpdatedAt).IsRequired();
+                e.HasIndex(x => x.UserEmail);
+            });
+
             EnforceRestrictedDeleteBehavior(modelBuilder);
             CreateIndexes(modelBuilder);
             base.OnModelCreating(modelBuilder);

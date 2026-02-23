@@ -9,5 +9,6 @@ namespace TheRealBank.Contexts
         public MainContext(DbContextOptions options) : base(options) { }
 
         public DbSet<Customer> Customers { get; set; } = default!;
+        public DbSet<ChatConversation> ChatConversations { get; set; } = default!;
     }
 }

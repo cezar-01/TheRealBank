@@ -11,6 +11,7 @@ namespace TheRealBank.Services
             services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<BankPlugin>();
             services.AddScoped<OllamaChatService>();
+            services.AddScoped<IChatHistoryService, ChatHistoryService>();
             return services;
         }
     }

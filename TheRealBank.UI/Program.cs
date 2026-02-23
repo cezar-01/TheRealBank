@@ -61,6 +61,44 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
 
+// --- Chat History API ---
+app.MapGet("/api/chat/history", async (HttpContext context, TheRealBank.Services.Chat.IChatHistoryService historyService) =>
+{
+    var email = context.User?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+    if (string.IsNullOrWhiteSpace(email)) return Results.Json(Array.Empty<object>());
+    var list = await historyService.GetConversationsAsync(email);
+    return Results.Json(list.Select(c => new { c.Id, c.Title, c.UpdatedAt }));
+});
+
+app.MapGet("/api/chat/history/{id:int}", async (int id, HttpContext context, TheRealBank.Services.Chat.IChatHistoryService historyService) =>
+{
+    var email = context.User?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+    if (string.IsNullOrWhiteSpace(email)) return Results.Unauthorized();
+    var conv = await historyService.GetConversationAsync(id);
+    if (conv is null || conv.UserEmail != email) return Results.NotFound();
+    return Results.Json(new { conv.Id, conv.Title, conv.MessagesJson });
+});
+
+app.MapPost("/api/chat/history", async (HttpContext context, TheRealBank.Services.Chat.IChatHistoryService historyService) =>
+{
+    var email = context.User?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+    if (string.IsNullOrWhiteSpace(email)) return Results.Unauthorized();
+    var body = await context.Request.ReadFromJsonAsync<SaveChatRequest>();
+    if (body is null) return Results.BadRequest();
+    var result = await historyService.SaveConversationAsync(email, body.Id, body.Title ?? "Conversa", body.MessagesJson ?? "[]");
+    return Results.Json(new { result.Id, result.Title });
+});
+
+app.MapDelete("/api/chat/history/{id:int}", async (int id, HttpContext context, TheRealBank.Services.Chat.IChatHistoryService historyService) =>
+{
+    var email = context.User?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+    if (string.IsNullOrWhiteSpace(email)) return Results.Unauthorized();
+    var conv = await historyService.GetConversationAsync(id);
+    if (conv is null || conv.UserEmail != email) return Results.NotFound();
+    await historyService.DeleteConversationAsync(id);
+    return Results.Ok();
+});
+
 app.MapPost("/api/chat", async (HttpContext context, OllamaChatService chatService) =>
 {
     var request = await context.Request.ReadFromJsonAsync<ChatRequest>();
@@ -107,3 +145,4 @@ app.Run();
 
 public record ChatRequest(string Message, List<ChatMessageDto>? History);
 public record ChatMessageDto(string? Role, string? Content);
+public record SaveChatRequest(int? Id, string? Title, string? MessagesJson);

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TheRealBank.Contexts;
+using TheRealBank.Repositories.Chat;
 using TheRealBank.Repositories.Users;
 
 namespace TheRealBank.Repositories
@@ -21,6 +22,7 @@ namespace TheRealBank.Repositories
                 options.UseMySql(cs, ServerVersion.Parse(versionText)));
 
             services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<IChatHistoryRepository, ChatHistoryRepository>();
             return services;
         }
     }
