@@ -99,6 +99,7 @@
                         <a class="offcanvas-dark-link" asp-page="/Customers/AddCliente"><i class="fa-solid fa-user-plus"></i> Novo Cliente</a>
                     }
 
+                    <a class="offcanvas-dark-link" asp-page="/ChatBot/Chat"><i class="fa-solid fa-robot"></i> Chat IA</a>
                     <a class="offcanvas-dark-link" asp-page="/Privacy"><i class="fa-solid fa-shield-halved"></i> Privacidade</a>
 
                     @if (User?.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
