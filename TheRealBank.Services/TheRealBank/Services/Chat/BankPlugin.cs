@@ -220,7 +220,7 @@ namespace TheRealBank.Services.Chat
                 var k when k.Contains("login") || k.Contains("entrar") || k.Contains("autenti") || k.Contains("logar") =>
                     "Acesse o login:\n[LINK:Entrar|/Autentifica/Auth]",
 
-                var k when kContains("criar conta") || k.Contains("novo cliente") || k.Contains("registr") || k.Contains("abrir conta") || k.Contains("cadastr") =>
+                var k when k.Contains("criar conta") || k.Contains("novo cliente") || k.Contains("registr") || k.Contains("abrir conta") || k.Contains("cadastr") =>
                     "Crie sua conta:\n[LINK:Criar Conta|/Customers/AddCliente]",
 
                 var k when k.Contains("área do cliente") || k.Contains("area do cliente") || k.Contains("home")
