@@ -41,36 +41,38 @@ namespace TheRealBank.Services.Chat
             3. Se tiver ambos, a função transferir_pix será executada automaticamente.
             4. Apresente o resultado com saldo atualizado e botões.
 
-            ## Links de navegação
-            SEMPRE inclua marcadores no formato: [LINK:Nome do Botão|/caminho]
-            O sistema transforma em botões clicáveis. Repasse os [LINK:...] das funções.
+            ## Links de navegação (REGRA CRÍTICA)
+            Você DEVE incluir botões de navegação usando o formato [LINK:Nome|/caminho] sempre que:
+            - O usuário perguntar ONDE fica algo ("onde fica", "como acesso", "onde encontro", "como chego").
+            - O usuário demonstrar DÚVIDA sobre qual área ir ou o que fazer.
+            - O usuário pedir para ser DIRECIONADO a algum lugar.
+            - Você mencionar qualquer seção ou funcionalidade do banco na sua resposta.
+            - Você NÃO conseguir executar uma ação (ex: pagar boleto) — direcione com botão.
+            - Após concluir qualquer operação (ex: transferência) — ofereça próximos passos com botões.
+            Os marcadores [LINK:...] são transformados automaticamente em botões clicáveis pelo sistema.
+            NUNCA escreva URLs soltas. SEMPRE use o formato [LINK:Nome do Botão|/caminho].
+            Quando houver dúvida, inclua MAIS botões do que menos.
 
-            ## Conhecimento do banco (RAG)
-            ### Área do Cliente (/Experiencia/Layout)
-            Tela principal. Saldo, cartão, transações, atalhos rápidos.
-
-            ### PIX (/Mobile/Pay/Pix)
-            - Transferir: /Mobile/Pay/PixPay/Transferir
-            - Receber: /Mobile/Pay/PixPay/Receber
-            - QR Code: /Mobile/Pay/PixPay/QRCode
-            - Copia e Cola: /Mobile/Pay/PixPay/PixCC
-            - Minhas Chaves: /Mobile/Pay/PixPay/MyKeys/Keys
-
-            ### Pagamentos
+            ## Mapa completo do banco (use estes caminhos exatos nos [LINK:...])
+            - Área do Cliente (home): /Experiencia/Layout
+            - PIX (menu geral): /Mobile/Pay/Pix
+            - Transferir PIX: /Mobile/Pay/PixPay/Transferir
+            - Receber PIX: /Mobile/Pay/PixPay/Receber
+            - QR Code PIX: /Mobile/Pay/PixPay/QRCode
+            - Copia e Cola PIX: /Mobile/Pay/PixPay/PixCC
+            - Minhas Chaves PIX: /Mobile/Pay/PixPay/MyKeys/Keys
             - Pagar Boleto: /Mobile/Pay/Boleto
-
-            ### Consultas
             - Extrato: /Mobile/Extrato
-            - Fatura do cartão: /Mobile/Fatura
-
-            ### Acesso
-            - Login: /Autentifica/Auth | Criar conta: /Customers/AddCliente
+            - Fatura do Cartão: /Mobile/Fatura
+            - Login: /Autentifica/Auth
+            - Criar Conta: /Customers/AddCliente
 
             ## Regras
             1. O e-mail do cliente logado já foi informado no início. Use-o automaticamente.
             2. NUNCA invente dados. Sempre use resultados das funções.
-            3. Sempre adicione [LINK:...] ao mencionar seções.
-            4. Repasse os [LINK:...] das funções na sua resposta.
+            3. SEMPRE adicione [LINK:...] ao mencionar seções — isso é OBRIGATÓRIO.
+            4. Repasse os [LINK:...] retornados pelas funções na sua resposta, sem modificar.
+            5. Se o usuário parecer perdido, ofereça os atalhos mais relevantes com [LINK:...].
             """;
 
         public OllamaChatService(IChatClient chatClient, BankPlugin bankPlugin)
@@ -181,16 +183,27 @@ namespace TheRealBank.Services.Chat
                 return null;
             }
 
-            // --- Navegação geral ---
+            // --- Navegação geral (perguntas de direcionamento) ---
             if (ContainsAny(userText, "onde fica", "como acesso", "como faço para", "onde encontro",
-                "como chego", "onde está", "aonde", "me leva", "caminho para", "como ir"))
+                "como chego", "onde está", "onde esta", "aonde", "me leva", "me leve",
+                "caminho para", "como ir", "ir para", "quero ir", "levar para",
+                "quero acessar", "navegar", "abrir", "mostrar", "mostre",
+                "quero ver", "preciso", "direcione", "redirecione", "me mande"))
             {
                 return _bankPlugin.NavegarBanco(userText);
             }
 
+            // --- Navegação por menção a funcionalidade ---
             if (ContainsAny(userText, "pix", "boleto", "extrato", "fatura", "cartão", "cartao",
                 "receber", "qr code", "qrcode", "copia e cola", "login", "entrar",
-                "criar conta", "cadastrar", "empréstimo", "emprestimo"))
+                "criar conta", "empréstimo", "emprestimo",
+                "pagamento", "pagar", "transferência", "transferencia",
+                "home", "início", "inicio", "área do cliente", "area do cliente", "painel",
+                "conta", "minha conta", "perfil", "senha", "segurança", "seguranca",
+                "ajuda", "help", "suporte", "privacidade",
+                "histórico", "historico", "movimentação", "movimentacao",
+                "chat", "assistente", "agente",
+                "recebimento", "cobrança", "cobranca", "débito", "debito", "crédito", "credito"))
             {
                 return _bankPlugin.NavegarBanco(userText);
             }

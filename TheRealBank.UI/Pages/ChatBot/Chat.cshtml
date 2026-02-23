@@ -239,6 +239,42 @@
         color: #fff;
         border-color: #007bff;
     }
+
+    .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .nav-link-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: #fff;
+        border: none;
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: 'Poppins', sans-serif;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(0,123,255,0.25);
+    }
+
+    .nav-link-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(0,123,255,0.4);
+        background: linear-gradient(135deg, #0056b3, #003d80);
+        color: #fff;
+    }
+
+    .nav-link-btn i {
+        font-size: 12px;
+    }
 </style>
 
 <div class="chat-container" style="position: relative;">
@@ -270,7 +306,8 @@ Como posso te ajudar hoje?
                 </div>
             </div>
         </div>
-    </div>
+
+        </div>
 
     <button class="scroll-down-btn" id="scrollDownBtn" title="Ir para o final">
         <i class="fa-solid fa-chevron-down"></i>
@@ -331,6 +368,31 @@ Como posso te ajudar hoje?
             }
         }
 
+        function renderMessageWithLinks(bubble, text) {
+            const linkRegex = /\[LINK:([^|]+)\|([^\]]+)\]/g;
+            const links = [];
+            let match;
+            while ((match = linkRegex.exec(text)) !== null) {
+                links.push({ label: match[1].trim(), url: match[2].trim() });
+            }
+
+            const cleanText = text.replace(linkRegex, '').replace(/\n\s*\n/g, '\n').trim();
+            bubble.textContent = cleanText;
+
+            if (links.length > 0) {
+                const container = document.createElement('div');
+                container.className = 'nav-links';
+                links.forEach(link => {
+                    const btn = document.createElement('a');
+                    btn.className = 'nav-link-btn';
+                    btn.href = link.url;
+                    btn.innerHTML = '<i class="fa-solid fa-arrow-right"></i> ' + link.label;
+                    container.appendChild(btn);
+                });
+                bubble.appendChild(container);
+            }
+        }
+
         function appendMessage(role, text) {
             const div = document.createElement('div');
             div.className = `message ${role}`;
@@ -341,7 +403,12 @@ Como posso te ajudar hoje?
 
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
-            bubble.textContent = text;
+
+            if (role === 'assistant' && text) {
+                renderMessageWithLinks(bubble, text);
+            } else {
+                bubble.textContent = text;
+            }
 
             div.appendChild(avatar);
             div.appendChild(bubble);
@@ -434,6 +501,8 @@ Como posso te ajudar hoje?
                 }
 
                 conversationHistory.push({ role: 'assistant', content: fullResponse });
+                renderMessageWithLinks(assistantBubble, fullResponse);
+                scrollIfNeeded();
 
             } catch (error) {
                 if (error.name === 'AbortError') {

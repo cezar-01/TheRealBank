@@ -174,13 +174,14 @@ namespace TheRealBank.Services.Chat
 
             return key switch
             {
+                // --- PIX (específicos primeiro) ---
                 var k when k.Contains("pix") && (k.Contains("chave") || k.Contains("key") || k.Contains("minhas") || k.Contains("cadastr")) =>
                     "Para gerenciar ou cadastrar suas chaves PIX:\n[LINK:Minhas Chaves PIX|/Mobile/Pay/PixPay/MyKeys/Keys]",
 
-                var k when k.Contains("pix") && k.Contains("transfer") =>
+                var k when k.Contains("pix") && (k.Contains("transfer") || k.Contains("enviar") || k.Contains("mandar")) =>
                     "Para transferir via PIX, informe a chave e o valor. Ou acesse a tela:\n[LINK:Transferir PIX|/Mobile/Pay/PixPay/Transferir]",
 
-                var k when k.Contains("pix") && k.Contains("receb") =>
+                var k when k.Contains("pix") && (k.Contains("receb") || k.Contains("cobr")) =>
                     "Para receber via PIX e gerar seu código:\n[LINK:Receber PIX|/Mobile/Pay/PixPay/Receber]",
 
                 var k when k.Contains("pix") && k.Contains("qr") =>
@@ -197,36 +198,88 @@ namespace TheRealBank.Services.Chat
                     "[LINK:Copia e Cola|/Mobile/Pay/PixPay/PixCC]\n" +
                     "[LINK:Minhas Chaves|/Mobile/Pay/PixPay/MyKeys/Keys]",
 
+                // --- Transferência (sem "pix" explícito) ---
+                var k when k.Contains("transferên") || k.Contains("transferen") || k.Contains("enviar dinheiro") || k.Contains("mandar dinheiro") =>
+                    "Para fazer uma transferência:\n[LINK:Transferir PIX|/Mobile/Pay/PixPay/Transferir]",
+
+                // --- Pagamentos ---
                 var k when k.Contains("boleto") =>
                     "Para pagar boletos:\n[LINK:Pagar Boleto|/Mobile/Pay/Boleto]",
 
-                var k when k.Contains("extrato") =>
-                    "Para ver seu extrato bancário:\n[LINK:Ver Extrato|/Mobile/Extrato]",
+                var k when k.Contains("pagamento") || k.Contains("pagar") =>
+                    "Opções de pagamento disponíveis:\n" +
+                    "[LINK:Pagar Boleto|/Mobile/Pay/Boleto]\n" +
+                    "[LINK:Transferir PIX|/Mobile/Pay/PixPay/Transferir]\n" +
+                    "[LINK:PIX Copia e Cola|/Mobile/Pay/PixPay/PixCC]",
 
-                var k when k.Contains("fatura") || k.Contains("cartão") || k.Contains("cartao") || k.Contains("crédito") || k.Contains("credito") =>
+                // --- Consultas ---
+                var k when k.Contains("extrato") || k.Contains("histórico") || k.Contains("historico") || k.Contains("movimenta") =>
+                    "Para ver seu extrato e histórico de transações:\n[LINK:Ver Extrato|/Mobile/Extrato]",
+
+                var k when k.Contains("fatura") || k.Contains("cartão") || k.Contains("cartao") || k.Contains("crédito") || k.Contains("credito") || k.Contains("débito") || k.Contains("debito") =>
                     "Para ver a fatura do cartão:\n[LINK:Ver Fatura|/Mobile/Fatura]",
 
                 var k when k.Contains("saldo") =>
                     "Seu saldo aparece na Área do Cliente. Posso consultar agora se quiser!\n[LINK:Área do Cliente|/Experiencia/Layout]",
 
-                var k when k.Contains("login") || k.Contains("entrar") || k.Contains("autenti") =>
+                var k when k.Contains("receb") || k.Contains("cobrança") || k.Contains("cobranca") =>
+                    "Para receber valores:\n[LINK:Receber PIX|/Mobile/Pay/PixPay/Receber]\n[LINK:QR Code PIX|/Mobile/Pay/PixPay/QRCode]",
+
+                // --- Acesso e conta ---
+                var k when k.Contains("login") || k.Contains("entrar") || k.Contains("autenti") || k.Contains("logar") =>
                     "Para fazer login:\n[LINK:Entrar|/Autentifica/Auth]",
 
-                var k when k.Contains("criar conta") || k.Contains("cadastr") || k.Contains("novo cliente") || k.Contains("registr") =>
+                var k when k.Contains("criar conta") || k.Contains("novo cliente") || k.Contains("registr") || k.Contains("abrir conta") =>
                     "Para criar uma nova conta:\n[LINK:Criar Conta|/Customers/AddCliente]",
 
-                var k when k.Contains("área do cliente") || k.Contains("area do cliente") || k.Contains("home") || k.Contains("inicio") || k.Contains("início") =>
+                var k when k.Contains("cadastr") =>
+                    "Para se cadastrar no banco:\n[LINK:Criar Conta|/Customers/AddCliente]",
+
+                // --- Área do cliente / Home ---
+                var k when k.Contains("área do cliente") || k.Contains("area do cliente") || k.Contains("home")
+                    || k.Contains("inicio") || k.Contains("início") || k.Contains("painel")
+                    || k.Contains("tela principal") || k.Contains("dashboard") =>
                     "A tela principal do banco:\n[LINK:Área do Cliente|/Experiencia/Layout]",
 
+                // --- Conta / Perfil / Dados ---
+                var k when k.Contains("minha conta") || k.Contains("conta") || k.Contains("perfil")
+                    || k.Contains("meus dados") || k.Contains("meu cadastro") =>
+                    "Para ver seus dados e sua conta:\n[LINK:Área do Cliente|/Experiencia/Layout]",
+
+                // --- Senha / Segurança ---
+                var k when k.Contains("senha") || k.Contains("seguranç") || k.Contains("seguranc") =>
+                    "Não consigo alterar senhas pelo chat, mas você pode acessar sua conta aqui:\n[LINK:Área do Cliente|/Experiencia/Layout]\n[LINK:Fazer Login|/Autentifica/Auth]",
+
+                // --- Empréstimo ---
+                var k when k.Contains("empréstimo") || k.Contains("emprestimo") =>
+                    "No momento não temos empréstimos pelo chat, mas acesse a área do cliente para mais informações:\n[LINK:Área do Cliente|/Experiencia/Layout]",
+
+                // --- Privacidade ---
                 var k when k.Contains("privacidade") =>
                     "Políticas de privacidade:\n[LINK:Privacidade|/Privacy]",
 
-                var k when k.Contains("chat") || k.Contains("ia") || k.Contains("assistente") =>
-                    "Você já está no Chat IA! ??",
+                // --- Ajuda ---
+                var k when k.Contains("ajuda") || k.Contains("help") || k.Contains("suporte") =>
+                    "Posso te ajudar com tudo isso:\n" +
+                    "[LINK:Área do Cliente|/Experiencia/Layout]\n" +
+                    "[LINK:PIX|/Mobile/Pay/Pix]\n" +
+                    "[LINK:Pagar Boleto|/Mobile/Pay/Boleto]\n" +
+                    "[LINK:Extrato|/Mobile/Extrato]\n" +
+                    "[LINK:Fatura do Cartão|/Mobile/Fatura]\n" +
+                    "[LINK:Minhas Chaves PIX|/Mobile/Pay/PixPay/MyKeys/Keys]\n" +
+                    "Ou me pergunte qualquer coisa sobre sua conta!",
 
+                // --- Chat / IA ---
+                var k when k.Contains("chat") || k.Contains("ia") || k.Contains("assistente") || k.Contains("agente") =>
+                    "Você já está no Chat IA! ?? Como posso te ajudar?",
+
+                // --- Fallback: mostra TODAS as áreas ---
                 _ => "As principais áreas do banco são:\n" +
                      "[LINK:Área do Cliente|/Experiencia/Layout]\n" +
                      "[LINK:PIX|/Mobile/Pay/Pix]\n" +
+                     "[LINK:Transferir PIX|/Mobile/Pay/PixPay/Transferir]\n" +
+                     "[LINK:Receber PIX|/Mobile/Pay/PixPay/Receber]\n" +
+                     "[LINK:Minhas Chaves PIX|/Mobile/Pay/PixPay/MyKeys/Keys]\n" +
                      "[LINK:Pagar Boleto|/Mobile/Pay/Boleto]\n" +
                      "[LINK:Extrato|/Mobile/Extrato]\n" +
                      "[LINK:Fatura do Cartão|/Mobile/Fatura]\n" +
