@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Globalization;
 using Microsoft.SemanticKernel;
+using TheRealBank.Repositories.Users;
 using TheRealBank.Services.Customers;
 
 namespace TheRealBank.Services.Chat
@@ -16,7 +17,7 @@ namespace TheRealBank.Services.Chat
         }
 
         [KernelFunction("consultar_saldo")]
-        [Description("Consulta o saldo da conta bancária do cliente pelo e-mail. Retorna o saldo formatado em reais.")]
+        [Description("Consulta o saldo da conta bancária do cliente pelo e-mail.")]
         public async Task<string> ConsultarSaldoAsync(
             [Description("E-mail do cliente")] string email)
         {
@@ -28,7 +29,7 @@ namespace TheRealBank.Services.Chat
                 return $"Não encontrei nenhuma conta com o e-mail '{email}'.";
 
             var nome = customer.Nome?.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "Cliente";
-            return $"{nome}, seu saldo atual é de {customer.Saldo.ToString("C", BRL)}.";
+            return $"{nome}, seu saldo atual é de {customer.Saldo.ToString("C", BRL)}.\n[LINK:Ver Extrato|/Mobile/Extrato]\n[LINK:Área do Cliente|/Experiencia/Layout]";
         }
 
         [KernelFunction("consultar_chave_pix")]
@@ -44,13 +45,13 @@ namespace TheRealBank.Services.Chat
                 return $"Não encontrei nenhuma conta com o e-mail '{email}'.";
 
             if (string.IsNullOrWhiteSpace(customer.KeyPix))
-                return "Você ainda não tem uma chave PIX cadastrada. Acesse: Área do Cliente ? PIX ? Minhas Chaves.";
+                return "Você ainda não tem uma chave PIX cadastrada. Cadastre uma agora!\n[LINK:Cadastrar Chave PIX|/Mobile/Pay/PixPay/MyKeys/Keys]";
 
-            return $"Sua chave PIX cadastrada é: {customer.KeyPix}";
+            return $"Sua chave PIX cadastrada é: {customer.KeyPix}\n[LINK:Gerenciar Chaves|/Mobile/Pay/PixPay/MyKeys/Keys]\n[LINK:Transferir PIX|/Mobile/Pay/PixPay/Transferir]\n[LINK:Receber PIX|/Mobile/Pay/PixPay/Receber]";
         }
 
         [KernelFunction("consultar_dados_cliente")]
-        [Description("Consulta os dados cadastrais do cliente (nome, CPF, e-mail, data de nascimento) pelo e-mail.")]
+        [Description("Consulta os dados cadastrais do cliente pelo e-mail.")]
         public async Task<string> ConsultarDadosClienteAsync(
             [Description("E-mail do cliente")] string email)
         {
@@ -61,78 +62,174 @@ namespace TheRealBank.Services.Chat
             if (customer is null)
                 return $"Não encontrei nenhuma conta com o e-mail '{email}'.";
 
-            return $"""
-                Dados da conta:
-                • Nome: {customer.Nome}
-                • CPF: {customer.CPF}
-                • E-mail: {customer.Email}
-                • Data de nascimento: {customer.DataNascimento:dd/MM/yyyy}
-                • Chave PIX: {(string.IsNullOrWhiteSpace(customer.KeyPix) ? "Não cadastrada" : customer.KeyPix)}
-                """;
+            return $"Dados da conta:\n" +
+                   $"• Nome: {customer.Nome}\n" +
+                   $"• CPF: {customer.CPF}\n" +
+                   $"• E-mail: {customer.Email}\n" +
+                   $"• Data de nascimento: {customer.DataNascimento:dd/MM/yyyy}\n" +
+                   $"• Chave PIX: {(string.IsNullOrWhiteSpace(customer.KeyPix) ? "Não cadastrada" : customer.KeyPix)}\n" +
+                   $"[LINK:Área do Cliente|/Experiencia/Layout]";
+        }
+
+        [KernelFunction("transferir_pix")]
+        [Description("Realiza uma transferência PIX do cliente logado para um destinatário identificado pela chave PIX. Requer e-mail do remetente, chave PIX do destinatário e valor.")]
+        public async Task<string> TransferirPixAsync(
+            [Description("E-mail do remetente (cliente logado)")] string emailRemetente,
+            [Description("Chave PIX do destinatário")] string chaveDestinatario,
+            [Description("Valor da transferência em reais")] decimal valor,
+            [Description("Descrição opcional")] string? descricao = null)
+        {
+            if (string.IsNullOrWhiteSpace(emailRemetente))
+                return "Preciso do seu e-mail para realizar a transferência. Faça login ou informe seu e-mail.";
+
+            if (string.IsNullOrWhiteSpace(chaveDestinatario))
+                return "Informe a chave PIX do destinatário (e-mail, CPF ou chave aleatória).";
+
+            if (valor <= 0)
+                return "O valor da transferência precisa ser maior que zero.";
+
+            var result = await _customerService.TransferPixAsync(emailRemetente, chaveDestinatario, valor, descricao);
+
+            return result.Status switch
+            {
+                TransferStatus.Success =>
+                    $"? Transferência de {valor.ToString("C", BRL)} realizada com sucesso!\n" +
+                    $"Novo saldo: {result.NewSenderBalance?.ToString("C", BRL)}\n" +
+                    $"[LINK:Ver Extrato|/Mobile/Extrato]\n[LINK:Nova Transferência|/Mobile/Pay/PixPay/Transferir]",
+
+                TransferStatus.SenderNotFound =>
+                    "Não encontrei sua conta. Verifique se você está logado.\n[LINK:Fazer Login|/Autentifica/Auth]",
+
+                TransferStatus.ReceiverNotFound =>
+                    $"Destinatário não encontrado com a chave '{chaveDestinatario}'. Verifique a chave e tente novamente.\n[LINK:Transferir PIX|/Mobile/Pay/PixPay/Transferir]",
+
+                TransferStatus.InsufficientFunds =>
+                    $"Saldo insuficiente. Seu saldo atual é {result.NewSenderBalance?.ToString("C", BRL)}.\n[LINK:Ver Extrato|/Mobile/Extrato]",
+
+                TransferStatus.InvalidAmount =>
+                    "Valor inválido. Informe um valor positivo.",
+
+                _ => "Ocorreu um erro inesperado. Tente novamente pela tela de transferência.\n[LINK:Transferir PIX|/Mobile/Pay/PixPay/Transferir]"
+            };
+        }
+
+        [KernelFunction("consultar_destinatario_pix")]
+        [Description("Consulta quem é o dono de uma chave PIX antes de transferir. Retorna o nome do destinatário.")]
+        public async Task<string> ConsultarDestinatarioPixAsync(
+            [Description("Chave PIX do destinatário (e-mail, CPF ou chave aleatória)")] string chavePix)
+        {
+            if (string.IsNullOrWhiteSpace(chavePix))
+                return "Informe a chave PIX para consultar o destinatário.";
+
+            var customer = await _customerService.GetCustomerByPixKeyAsync(chavePix);
+            if (customer is null)
+                return $"Nenhum destinatário encontrado com a chave '{chavePix}'. Verifique se a chave está correta.";
+
+            var nome = customer.Nome ?? "Destinatário";
+            return $"Destinatário encontrado: {nome}\nChave: {chavePix}\n\nDeseja transferir? Informe o valor.\n[LINK:Transferir PIX|/Mobile/Pay/PixPay/Transferir]";
+        }
+
+        [KernelFunction("cadastrar_chave_pix")]
+        [Description("Cadastra ou altera a chave PIX do cliente. O tipo pode ser 'email', 'cpf' ou 'aleatoria'.")]
+        public async Task<string> CadastrarChavePixAsync(
+            [Description("E-mail do cliente")] string email,
+            [Description("Tipo da chave: 'email', 'cpf' ou 'aleatoria'")] string tipo)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return "Preciso do seu e-mail para cadastrar a chave PIX.";
+
+            var customer = await _customerService.GetCustomerByEmailAsync(email);
+            if (customer is null)
+                return $"Não encontrei sua conta com o e-mail '{email}'.";
+
+            var novaChave = tipo?.Trim().ToLowerInvariant() switch
+            {
+                "email" => customer.Email ?? email,
+                "cpf" => customer.CPF ?? "",
+                "aleatoria" or "aleatorio" or "random" => Guid.NewGuid().ToString("D"),
+                _ => ""
+            };
+
+            if (string.IsNullOrWhiteSpace(novaChave))
+                return "Tipo de chave inválido. Escolha: email, cpf ou aleatoria.\n[LINK:Gerenciar Chaves|/Mobile/Pay/PixPay/MyKeys/Keys]";
+
+            await _customerService.SetPixKeyAsync(email, novaChave);
+
+            var tipoFormatado = tipo?.ToLowerInvariant() switch
+            {
+                "email" => "E-mail",
+                "cpf" => "CPF",
+                _ => "Aleatória"
+            };
+
+            return $"? Chave PIX cadastrada com sucesso!\nTipo: {tipoFormatado}\nChave: {novaChave}\n[LINK:Receber PIX|/Mobile/Pay/PixPay/Receber]\n[LINK:Transferir PIX|/Mobile/Pay/PixPay/Transferir]";
         }
 
         [KernelFunction("navegar_banco")]
-        [Description("Indica ao cliente onde encontrar uma funcionalidade ou seção específica do banco digital TheRealBank. Use quando o cliente perguntar onde fica algo ou como acessar algo.")]
+        [Description("Indica ao cliente onde encontrar uma funcionalidade ou seção do banco.")]
         public string NavegarBanco(
-            [Description("Nome da funcionalidade que o cliente procura, por exemplo: pix, boleto, extrato, fatura, saldo, chave pix, criar conta, login, area do cliente")] string funcionalidade)
+            [Description("Nome da funcionalidade")] string funcionalidade)
         {
             var key = (funcionalidade ?? "").Trim().ToLowerInvariant();
 
             return key switch
             {
-                var k when k.Contains("pix") && (k.Contains("chave") || k.Contains("key") || k.Contains("minhas")) =>
-                    "Para gerenciar suas chaves PIX, acesse: Área do Cliente ? PIX ? Minhas Chaves (/Mobile/Pay/PixPay/MyKeys/Keys).",
+                var k when k.Contains("pix") && (k.Contains("chave") || k.Contains("key") || k.Contains("minhas") || k.Contains("cadastr")) =>
+                    "Para gerenciar ou cadastrar suas chaves PIX:\n[LINK:Minhas Chaves PIX|/Mobile/Pay/PixPay/MyKeys/Keys]",
 
                 var k when k.Contains("pix") && k.Contains("transfer") =>
-                    "Para transferir via PIX, acesse: Área do Cliente ? PIX ? Transferir (/Mobile/Pay/PixPay/Transferir).",
+                    "Para transferir via PIX, informe a chave e o valor. Ou acesse a tela:\n[LINK:Transferir PIX|/Mobile/Pay/PixPay/Transferir]",
 
                 var k when k.Contains("pix") && k.Contains("receb") =>
-                    "Para receber via PIX, acesse: Área do Cliente ? PIX ? Receber (/Mobile/Pay/PixPay/Receber).",
+                    "Para receber via PIX e gerar seu código:\n[LINK:Receber PIX|/Mobile/Pay/PixPay/Receber]",
 
                 var k when k.Contains("pix") && k.Contains("qr") =>
-                    "Para gerar ou ler QR Code PIX, acesse: Área do Cliente ? PIX ? QR Code (/Mobile/Pay/PixPay/QRCode).",
+                    "Para gerar ou ler QR Code PIX:\n[LINK:QR Code PIX|/Mobile/Pay/PixPay/QRCode]",
 
-                var k when k.Contains("pix") && k.Contains("copia") =>
-                    "Para PIX Copia e Cola, acesse: Área do Cliente ? PIX ? Copia e Cola (/Mobile/Pay/PixPay/PixCC).",
+                var k when k.Contains("pix") && (k.Contains("copia") || k.Contains("cola")) =>
+                    "Para usar PIX Copia e Cola:\n[LINK:PIX Copia e Cola|/Mobile/Pay/PixPay/PixCC]",
 
                 var k when k.Contains("pix") =>
-                    "Para acessar todas as opções de PIX, vá em: Área do Cliente ? PIX (/Mobile/Pay/Pix). Lá você encontra: Transferir, Receber, QR Code, Copia e Cola e Minhas Chaves.",
+                    "Aqui estão todas as opções de PIX disponíveis:\n" +
+                    "[LINK:Transferir|/Mobile/Pay/PixPay/Transferir]\n" +
+                    "[LINK:Receber|/Mobile/Pay/PixPay/Receber]\n" +
+                    "[LINK:QR Code|/Mobile/Pay/PixPay/QRCode]\n" +
+                    "[LINK:Copia e Cola|/Mobile/Pay/PixPay/PixCC]\n" +
+                    "[LINK:Minhas Chaves|/Mobile/Pay/PixPay/MyKeys/Keys]",
 
                 var k when k.Contains("boleto") =>
-                    "Para pagar boletos, acesse: Área do Cliente ? Pagar Boleto (/Mobile/Pay/Boleto).",
+                    "Para pagar boletos:\n[LINK:Pagar Boleto|/Mobile/Pay/Boleto]",
 
                 var k when k.Contains("extrato") =>
-                    "Para ver seu extrato, acesse: Área do Cliente ? Ver Extrato (/Mobile/Extrato).",
+                    "Para ver seu extrato bancário:\n[LINK:Ver Extrato|/Mobile/Extrato]",
 
                 var k when k.Contains("fatura") || k.Contains("cartão") || k.Contains("cartao") || k.Contains("crédito") || k.Contains("credito") =>
-                    "Para ver a fatura do cartão de crédito, acesse: Área do Cliente ? Fatura (/Mobile/Fatura).",
+                    "Para ver a fatura do cartão:\n[LINK:Ver Fatura|/Mobile/Fatura]",
 
                 var k when k.Contains("saldo") =>
-                    "Seu saldo aparece na tela principal da Área do Cliente (/Experiencia/Layout). Se quiser, posso consultar seu saldo agora — basta me dizer seu e-mail.",
+                    "Seu saldo aparece na Área do Cliente. Posso consultar agora se quiser!\n[LINK:Área do Cliente|/Experiencia/Layout]",
 
                 var k when k.Contains("login") || k.Contains("entrar") || k.Contains("autenti") =>
-                    "Para fazer login, acesse: Entrar (/Autentifica/Auth).",
+                    "Para fazer login:\n[LINK:Entrar|/Autentifica/Auth]",
 
                 var k when k.Contains("criar conta") || k.Contains("cadastr") || k.Contains("novo cliente") || k.Contains("registr") =>
-                    "Para criar uma nova conta, acesse: Novo Cliente (/Customers/AddCliente).",
+                    "Para criar uma nova conta:\n[LINK:Criar Conta|/Customers/AddCliente]",
 
                 var k when k.Contains("área do cliente") || k.Contains("area do cliente") || k.Contains("home") || k.Contains("inicio") || k.Contains("início") =>
-                    "A tela principal do banco (Área do Cliente) fica em: /Experiencia/Layout. Lá você vê saldo, cartão, transações e atalhos para PIX, Boleto, Cartões e Empréstimo.",
+                    "A tela principal do banco:\n[LINK:Área do Cliente|/Experiencia/Layout]",
 
                 var k when k.Contains("privacidade") =>
-                    "A página de Privacidade fica em: /Privacy.",
+                    "Políticas de privacidade:\n[LINK:Privacidade|/Privacy]",
 
                 var k when k.Contains("chat") || k.Contains("ia") || k.Contains("assistente") =>
-                    "Você já está no Chat IA! Mas o link direto é: /ChatBot/Chat.",
+                    "Você já está no Chat IA! ??",
 
-                _ => $"Não encontrei uma seção específica para '{funcionalidade}'. As principais áreas do banco são:\n" +
-                     "• Área do Cliente (saldo, cartão, transações): /Experiencia/Layout\n" +
-                     "• PIX (transferir, receber, QR Code, chaves): /Mobile/Pay/Pix\n" +
-                     "• Pagar Boleto: /Mobile/Pay/Boleto\n" +
-                     "• Extrato: /Mobile/Extrato\n" +
-                     "• Fatura do cartão: /Mobile/Fatura\n" +
-                     "• Login: /Autentifica/Auth\n" +
-                     "• Criar conta: /Customers/AddCliente\n" +
+                _ => "As principais áreas do banco são:\n" +
+                     "[LINK:Área do Cliente|/Experiencia/Layout]\n" +
+                     "[LINK:PIX|/Mobile/Pay/Pix]\n" +
+                     "[LINK:Pagar Boleto|/Mobile/Pay/Boleto]\n" +
+                     "[LINK:Extrato|/Mobile/Extrato]\n" +
+                     "[LINK:Fatura do Cartão|/Mobile/Fatura]\n" +
                      "Posso te ajudar a encontrar algo mais específico?"
             };
         }

@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
 
@@ -14,52 +15,64 @@ namespace TheRealBank.Services.Chat
             Você é o Agente Financeiro do TheRealBank, um assistente virtual inteligente de um banco digital.
 
             ## Sua personalidade
-            - Seja educado, profissional e objetivo.
-            - Use português brasileiro.
+            - Seja educado, profissional e objetivo. Use português brasileiro.
             - Use emojis com moderação para deixar a conversa amigável.
-            - Sempre se apresente como "Agente Financeiro do TheRealBank" quando perguntarem quem você é.
+            - Sempre se apresente como "Agente Financeiro do TheRealBank" quando perguntarem.
 
-            ## Suas capacidades
-            Você tem acesso a funções que podem ser chamadas para ajudar o cliente:
-            - **consultar_saldo**: Consulta o saldo do cliente pelo e-mail.
-            - **consultar_chave_pix**: Consulta a chave PIX do cliente pelo e-mail.
-            - **consultar_dados_cliente**: Consulta dados cadastrais do cliente pelo e-mail.
-            - **navegar_banco**: Indica ao cliente onde encontrar funcionalidades do banco.
+            ## Suas capacidades (o que você PODE fazer)
+            - Consultar saldo, chave PIX e dados cadastrais do cliente.
+            - Realizar transferência PIX (pedir chave do destinatário e valor).
+            - Consultar quem é o dono de uma chave PIX antes de transferir.
+            - Cadastrar ou trocar a chave PIX do cliente (email, cpf ou aleatória).
+            - Direcionar o cliente para qualquer seção do banco com botões clicáveis.
+
+            ## Suas limitações (o que você NÃO pode fazer)
+            - NÃO pode pagar boletos (direcione para a tela de boleto).
+            - NÃO pode alterar dados cadastrais ou senha.
+            - NÃO pode aprovar empréstimos ou crédito.
+            - NÃO pode acessar dados de outros clientes sem a chave PIX.
+            - NÃO tem conhecimento sobre assuntos fora do banco.
+            - Quando não puder fazer algo, explique a limitação e direcione com [LINK:...].
+
+            ## Fluxo de Transferência PIX
+            Quando o cliente quiser transferir:
+            1. Pergunte a chave PIX do destinatário (se não informou).
+            2. Pergunte o valor (se não informou).
+            3. Se tiver ambos, a função transferir_pix será executada automaticamente.
+            4. Apresente o resultado com saldo atualizado e botões.
+
+            ## Links de navegação
+            SEMPRE inclua marcadores no formato: [LINK:Nome do Botão|/caminho]
+            O sistema transforma em botões clicáveis. Repasse os [LINK:...] das funções.
 
             ## Conhecimento do banco (RAG)
-            O TheRealBank é um banco digital com as seguintes seções e funcionalidades:
-
             ### Área do Cliente (/Experiencia/Layout)
-            - Tela principal após login.
-            - Mostra saldo da conta, cartão de crédito, últimas transações.
-            - Atalhos rápidos: PIX, Pagar Boleto, Cartões, Empréstimo.
+            Tela principal. Saldo, cartão, transações, atalhos rápidos.
 
             ### PIX (/Mobile/Pay/Pix)
-            - Transferir para outra conta via chave PIX: /Mobile/Pay/PixPay/Transferir
-            - Receber pagamentos: /Mobile/Pay/PixPay/Receber
-            - QR Code (gerar/ler): /Mobile/Pay/PixPay/QRCode
-            - PIX Copia e Cola: /Mobile/Pay/PixPay/PixCC
-            - Gerenciar Minhas Chaves PIX: /Mobile/Pay/PixPay/MyKeys/Keys
+            - Transferir: /Mobile/Pay/PixPay/Transferir
+            - Receber: /Mobile/Pay/PixPay/Receber
+            - QR Code: /Mobile/Pay/PixPay/QRCode
+            - Copia e Cola: /Mobile/Pay/PixPay/PixCC
+            - Minhas Chaves: /Mobile/Pay/PixPay/MyKeys/Keys
 
             ### Pagamentos
             - Pagar Boleto: /Mobile/Pay/Boleto
 
             ### Consultas
-            - Extrato bancário: /Mobile/Extrato
-            - Fatura do cartão de crédito: /Mobile/Fatura
+            - Extrato: /Mobile/Extrato
+            - Fatura do cartão: /Mobile/Fatura
 
             ### Acesso
-            - Login / Entrar: /Autentifica/Auth
-            - Criar nova conta: /Customers/AddCliente
-            - Chat IA (você): /ChatBot/Chat
+            - Login: /Autentifica/Auth | Criar conta: /Customers/AddCliente
 
-            ## Regras importantes
-            1. Quando o cliente pedir para consultar saldo, chave PIX ou dados, peça o e-mail dele se ainda não souber.
-            2. Quando o cliente perguntar onde fica algo ou como acessar uma funcionalidade, use a função navegar_banco.
-            3. NUNCA invente dados financeiros. Sempre use as funções para buscar dados reais.
-            4. Se não souber responder algo fora do contexto bancário, diga que é um agente financeiro e só pode ajudar com assuntos do banco.
-            5. Quando retornar resultados das funções, apresente de forma amigável e formatada.
+            ## Regras
+            1. O e-mail do cliente logado já foi informado no início. Use-o automaticamente.
+            2. NUNCA invente dados. Sempre use resultados das funções.
+            3. Sempre adicione [LINK:...] ao mencionar seções.
+            4. Repasse os [LINK:...] das funções na sua resposta.
             """;
+
         public OllamaChatService(IChatClient chatClient, BankPlugin bankPlugin)
         {
             _chatClient = chatClient;
@@ -101,16 +114,58 @@ namespace TheRealBank.Services.Chat
             if (lastMessage is null) return null;
 
             var userText = lastMessage.Text?.ToLowerInvariant() ?? "";
-
             var email = ExtractEmail(history);
 
-            if (ContainsAny(userText, "saldo", "quanto tenho", "quanto eu tenho", "meu dinheiro", "minha conta"))
+            // --- PIX Transfer: detect "transferir X para CHAVE" pattern ---
+            if (ContainsAny(userText, "transferir", "enviar", "mandar", "pagar pix", "fazer pix"))
+            {
+                var valor = ExtractDecimal(userText);
+                var chave = ExtractPixKey(userText);
+
+                // If we have both value and key, execute transfer
+                if (valor > 0 && chave is not null && email is not null)
+                    return await _bankPlugin.TransferirPixAsync(email, chave, valor);
+
+                // If only key, ask for value
+                if (chave is not null && valor <= 0)
+                {
+                    var dest = await _bankPlugin.ConsultarDestinatarioPixAsync(chave);
+                    return dest;
+                }
+
+                // Otherwise let the LLM guide the conversation
+                return _bankPlugin.NavegarBanco("pix transferir");
+            }
+
+            // --- Consultar destinatário ---
+            if (ContainsAny(userText, "quem é", "quem e", "dono da chave", "destinatário", "destinatario", "para quem"))
+            {
+                var chave = ExtractPixKey(userText);
+                if (chave is not null)
+                    return await _bankPlugin.ConsultarDestinatarioPixAsync(chave);
+            }
+
+            // --- Cadastrar chave PIX ---
+            if (ContainsAny(userText, "cadastrar chave", "registrar chave", "criar chave", "trocar chave", "mudar chave", "nova chave"))
+            {
+                if (email is null) return null;
+
+                var tipo = "aleatoria";
+                if (ContainsAny(userText, "email", "e-mail")) tipo = "email";
+                else if (ContainsAny(userText, "cpf")) tipo = "cpf";
+
+                return await _bankPlugin.CadastrarChavePixAsync(email, tipo);
+            }
+
+            // --- Consultar saldo ---
+            if (ContainsAny(userText, "saldo", "quanto tenho", "quanto eu tenho", "meu dinheiro"))
             {
                 if (email is not null)
                     return await _bankPlugin.ConsultarSaldoAsync(email);
                 return null;
             }
 
+            // --- Consultar chave PIX ---
             if (ContainsAny(userText, "chave pix", "minha chave", "minhas chaves", "key pix"))
             {
                 if (email is not null)
@@ -118,6 +173,7 @@ namespace TheRealBank.Services.Chat
                 return null;
             }
 
+            // --- Consultar dados ---
             if (ContainsAny(userText, "meus dados", "meu cadastro", "minha informação", "minhas informações", "dados cadastrais"))
             {
                 if (email is not null)
@@ -125,6 +181,7 @@ namespace TheRealBank.Services.Chat
                 return null;
             }
 
+            // --- Navegação geral ---
             if (ContainsAny(userText, "onde fica", "como acesso", "como faço para", "onde encontro",
                 "como chego", "onde está", "aonde", "me leva", "caminho para", "como ir"))
             {
@@ -132,7 +189,7 @@ namespace TheRealBank.Services.Chat
             }
 
             if (ContainsAny(userText, "pix", "boleto", "extrato", "fatura", "cartão", "cartao",
-                "transferir", "transferência", "transferencia", "login", "entrar",
+                "receber", "qr code", "qrcode", "copia e cola", "login", "entrar",
                 "criar conta", "cadastrar", "empréstimo", "emprestimo"))
             {
                 return _bankPlugin.NavegarBanco(userText);
@@ -146,12 +203,53 @@ namespace TheRealBank.Services.Chat
             for (int i = history.Count - 1; i >= 0; i--)
             {
                 var text = history[i].Text ?? "";
-                var match = System.Text.RegularExpressions.Regex.Match(
-                    text, @"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}");
+                var match = Regex.Match(text, @"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}");
                 if (match.Success)
                     return match.Value;
             }
             return null;
+        }
+
+        private static string? ExtractPixKey(string text)
+        {
+            // Try email pattern
+            var emailMatch = Regex.Match(text, @"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}");
+            if (emailMatch.Success) return emailMatch.Value;
+
+            // Try CPF pattern (xxx.xxx.xxx-xx or 11 digits)
+            var cpfMatch = Regex.Match(text, @"\d{3}\.?\d{3}\.?\d{3}-?\d{2}");
+            if (cpfMatch.Success) return cpfMatch.Value;
+
+            // Try UUID/random key
+            var uuidMatch = Regex.Match(text, @"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}", RegexOptions.IgnoreCase);
+            if (uuidMatch.Success) return uuidMatch.Value;
+
+            return null;
+        }
+
+        private static decimal ExtractDecimal(string text)
+        {
+            // Match patterns like: R$ 100, R$100,50, 100.50, 100,50, 50 reais
+            var match = Regex.Match(text, @"r?\$?\s*(\d{1,}[\.,]?\d{0,2})");
+            if (match.Success)
+            {
+                var raw = match.Groups[1].Value.Replace(".", "").Replace(",", ".");
+                if (decimal.TryParse(raw, System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out var val))
+                    return val;
+            }
+
+            // Try "X reais"
+            match = Regex.Match(text, @"(\d+[\.,]?\d*)\s*reais?");
+            if (match.Success)
+            {
+                var raw = match.Groups[1].Value.Replace(".", "").Replace(",", ".");
+                if (decimal.TryParse(raw, System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out var val))
+                    return val;
+            }
+
+            return 0m;
         }
 
         private static bool ContainsAny(string text, params string[] keywords)

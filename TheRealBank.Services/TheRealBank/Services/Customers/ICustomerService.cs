@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using TheRealBank.Repositories.Users;
 
 namespace TheRealBank.Services.Customers
 {
@@ -16,5 +17,7 @@ namespace TheRealBank.Services.Customers
         // PIX support
         Task<Customer?> GetCustomerByEmailAsync(string email);
         Task SetPixKeyAsync(string email, string keyPix);
+        Task<Customer?> GetCustomerByPixKeyAsync(string keyPix);
+        Task<TransferResult> TransferPixAsync(string senderEmail, string pixKey, decimal amount, string? description = null);
     }
 }

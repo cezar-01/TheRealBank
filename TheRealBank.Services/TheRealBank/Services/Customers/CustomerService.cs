@@ -78,6 +78,17 @@ namespace TheRealBank.Services.Customers
             await repo.UpdateAsync(entity);
         }
 
+        public async Task<Customer?> GetCustomerByPixKeyAsync(string keyPix)
+        {
+            var entity = await repo.GetByPixKeyAsync(keyPix);
+            return entity is null ? null : MapToDto(entity);
+        }
+
+        public async Task<TransferResult> TransferPixAsync(string senderEmail, string pixKey, decimal amount, string? description = null)
+        {
+            return await repo.TransferAsync(senderEmail, pixKey, amount, description);
+        }
+
         private static Ent MapToEntity(Customer c) => new Ent
         {
             Nome = c.Nome ?? string.Empty,
