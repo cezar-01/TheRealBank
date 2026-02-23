@@ -37,8 +37,20 @@ builder.Services.AddAuthorization(o =>
     o.AddPolicy("AdminOnly", p => p.RequireRole("Admin"));
 });
 
-builder.Services.AddSingleton<IChatClient>(_ =>
-    new OllamaApiClient("http://localhost:11434", "phi3:mini"));
+var ollamaBaseUrl =
+    builder.Configuration["Ollama:BaseUrl"]
+    ?? builder.Configuration["Ollama__BaseUrl"]
+    ?? builder.Configuration["OLLAMA_BASE_URL"]
+    ?? builder.Configuration["OLLAMA_HOST"]
+    ?? "http://localhost:11434";
+
+var ollamaModel =
+    builder.Configuration["Ollama:Model"]
+    ?? builder.Configuration["Ollama__Model"]
+    ?? builder.Configuration["OLLAMA_MODEL"]
+    ?? "phi3:mini";
+
+builder.Services.AddSingleton<IChatClient>(_ => new OllamaApiClient(new Uri(ollamaBaseUrl), ollamaModel));
 
 var app = builder.Build();
 
