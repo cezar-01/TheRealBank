@@ -25,9 +25,7 @@ namespace TheRealBank.UI.Pages.Mobile.Pay
 
         [BindProperty]
         [Required]
-        public string SelectedKeyId { get; set; } = string.Empty; // "email" | "cpf" | "random"
-
-        // FIX: use async Task and the OnGetAsync pattern (never async void)
+        public string SelectedKeyId { get; set; } = string.Empty; 
         public async Task OnGetAsync()
         {
             var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
@@ -48,7 +46,7 @@ namespace TheRealBank.UI.Pages.Mobile.Pay
         {
             if (!ModelState.IsValid)
             {
-                await OnGetAsync(); // FIX: await the async loader
+                await OnGetAsync(); 
                 return Page();
             }
 
@@ -60,7 +58,7 @@ namespace TheRealBank.UI.Pages.Mobile.Pay
             if (customer is null)
             {
                 ModelState.AddModelError(string.Empty, "Usuário não encontrado.");
-                await OnGetAsync(); // FIX: await
+                await OnGetAsync(); 
                 return Page();
             }
 
@@ -75,7 +73,7 @@ namespace TheRealBank.UI.Pages.Mobile.Pay
             if (string.IsNullOrWhiteSpace(keyToSave))
             {
                 ModelState.AddModelError(string.Empty, "Seleção inválida.");
-                await OnGetAsync(); // FIX: await
+                await OnGetAsync(); 
                 return Page();
             }
 

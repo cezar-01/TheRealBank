@@ -5,7 +5,6 @@
 }
 
 <style>
-    /* CSS BASE DO SEU APLICATIVO (COPIADO) */
     .experience {
         --purple: #5e00a3;
         --green: #00c66e;
@@ -127,7 +126,6 @@
                 font-weight: 500;
             }
 
-        /* --- ESTILOS REUTILIZADOS PARA ABAS E BOLETO --- */
 
         .experience .balance-info {
             font-size: 14px;
@@ -142,7 +140,6 @@
                 color: var(--green);
             }
 
-        /* Estilo das Abas (copiado do QR Code) */
         .experience .nav-tabs-creative {
             border-bottom: none;
             display: flex;
@@ -174,7 +171,6 @@
                     color: var(--dark-gray);
                 }
 
-        /* Estilos dos cards (agora dentro das abas) */
         .experience .scanner-card,
         .experience .manual-entry-card {
             background-color: var(--white);
@@ -185,7 +181,6 @@
             text-align: center;
         }
 
-        /* Ajuste para os cards não terem borda extra dentro da aba */
         .experience .tab-pane > section {
             border: none;
             box-shadow: none;
@@ -207,7 +202,6 @@
             margin-bottom: 20px;
         }
 
-        /* Simulação de Câmera */
         .experience .camera-viewfinder-boleto {
             width: 100%;
             max-width: 250px;
@@ -233,21 +227,8 @@
             animation: scan-boleto 2s linear infinite;
         }
 
-    @@keyframes scan-boleto {
-        0% {
-            transform: translateY(-73px);
-        }
+    @@keyframes scan-boleto {0% { transform: translateY(-73px); } 50% { transform: translateY(73px); }100% { transform: translateY(-73px);}}
 
-        50% {
-            transform: translateY(73px);
-        }
-
-        100% {
-            transform: translateY(-73px);
-        }
-    }
-
-    /* Botões */
     .experience .btn-secondary-full,
     .experience .btn-primary-full {
         background-color: var(--purple);
@@ -282,7 +263,6 @@
         transform: translateY(-2px);
     }
 
-    /* Formulário de digitação */
     .experience .form-group {
         margin-bottom: 20px;
         text-align: left;

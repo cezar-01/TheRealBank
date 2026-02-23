@@ -11,10 +11,9 @@ namespace TheRealBank.Contexts.Base
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Mapeamento explícito do Customer para evitar divergências
             modelBuilder.Entity<TheRealBank.Entities.Customer>(e =>
             {
-                e.ToTable("Customers"); // nome exato da tabela
+                e.ToTable("Customers"); 
 
                 e.HasKey(x => x.Id);
 
@@ -33,7 +32,6 @@ namespace TheRealBank.Contexts.Base
                 e.Property(x => x.Saldo)
                     .HasPrecision(18, 2);
 
-                // Senha mapeada explicitamente
                 e.Property(x => x.Senha)
                     .IsRequired()
                     .HasMaxLength(70)

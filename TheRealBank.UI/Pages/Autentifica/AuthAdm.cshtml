@@ -5,7 +5,6 @@
 }
 
 <style>
-    /* Reutilizando o mesmo CSS da Auth.cshtml para consistência */
     .auth-container {
         min-height: 80vh;
         display: flex;
@@ -15,7 +14,7 @@
 
     .login-card {
         background-color: var(--bank-dark);
-        border: 1px solid rgba(255, 0, 0, 0.15); /* Leve tom vermelho na borda para diferenciar ADM */
+        border: 1px solid rgba(255, 0, 0, 0.15); 
         border-radius: 15px;
         padding: 40px;
         width: 100%;
@@ -40,7 +39,7 @@
 
     .login-icon {
         font-size: 50px;
-        color: #dc3545; /* Cor VERMELHA para indicar área restrita/perigo */
+        color: #dc3545; 
         margin-bottom: 15px;
     }
 
@@ -63,12 +62,12 @@
 
         .form-control-custom:focus {
             background-color: rgba(255, 255, 255, 0.1) !important;
-            border-color: #dc3545 !important; /* Foco vermelho para ADM */
+            border-color: #dc3545 !important; 
             box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
         }
 
     .btn-login-adm {
-        background-color: #dc3545; /* Botão vermelho para ADM */
+        background-color: #dc3545; 
         color: white;
         font-weight: 600;
         padding: 12px;

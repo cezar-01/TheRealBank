@@ -15,7 +15,6 @@ namespace TheRealBank.UI.Pages.Mobile.Pay
 
         public void OnGet()
         {
-            // Puxa o saldo (estou usando o valor do seu print)
             SaldoDisponivel = 1110473.88m;
         }
 
@@ -23,19 +22,11 @@ namespace TheRealBank.UI.Pages.Mobile.Pay
         {
             if (!ModelState.IsValid)
             {
-                // Se o formulário for inválido (código vazio),
-                // recarrega o saldo e mostra a página novamente com o erro.
                 SaldoDisponivel = 1110473.88m;
                 return Page();
             }
 
-            // SE O CÓDIGO FOR VÁLIDO:
-            // 1. Decodifique o 'PixCode'
-            // 2. Busque os dados do destinatário
-            // 3. Redirecione para uma página de "Confirmação"
-            //    passando os dados (Ex: return RedirectToPage("ConfirmarPix", new { code = PixCode });)
-
-            // Por enquanto, vamos apenas redirecionar de volta para a Home
+            
             return RedirectToPage("/Experiencia/Layout");
         }
     }

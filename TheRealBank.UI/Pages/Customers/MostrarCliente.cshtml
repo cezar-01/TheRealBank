@@ -2,13 +2,10 @@
 @model TheRealBank.UI.Pages.Customers.MostrarClienteModel
 @{
     ViewData["Title"] = "Detalhes do Cliente";
-    Layout = "/Pages/Shared/_Layout.cshtml"; // CORRIGIDO: Aponta para o layout correto
+    Layout = "/Pages/Shared/_Layout.cshtml"; 
 }
 
 <style>
-    /* * Este CSS usa as variáveis de cor (ex: --bank-dark, --bank-accent)
-         * que estão definidas no seu _Layout.cshtml
-        */
     .hero-section {
         background: linear-gradient(135deg, #f2f7fa 0%, #ffffff 100%);
         display: flex;
@@ -18,22 +15,20 @@
         padding: 40px 0;
     }
 
-    /* O card de detalhes */
     .details-container {
-        text-align: center; /* Centraliza o conteúdo do card */
+        text-align: center; 
         background-color: white;
         padding: 40px 50px;
         border-radius: 16px;
         box-shadow: 0 15px 40px rgba(0,0,0,0.08);
         border: 1px solid #e0e8f0;
-        max-width: 650px; /* Um pouco mais largo para os detalhes */
+        max-width: 650px; 
         width: 90%;
         opacity: 0;
         transform: translateY(20px);
         animation: fadeInSlideUp 0.8s ease-out forwards;
     }
 
-    /* Animação de entrada */
     @@keyframes fadeInSlideUp {
         to {
             opacity: 1;
@@ -46,24 +41,23 @@
         margin-bottom: 25px;
     }
 
-    /* Ícone de Sucesso (Verde) */
+   
     .details-icon {
         font-size: 3rem;
-        color: #28a745; /* Verde Sucesso */
+        color: #28a745; 
         margin-bottom: 15px;
     }
 
     .details-header h1 {
-        color: var(--bank-dark); /* Cor Azul Escura do título */
+        color: var(--bank-dark);
         font-weight: 700;
         font-size: 2.2em;
         margin: 0;
     }
 
-    /* Callout de Sucesso (Caixa Verde) */
     .success-message {
-        color: #155724; /* Verde escuro (texto) */
-        background-color: #d4edda; /* Verde claro (fundo) */
+        color: #155724; 
+        background-color: #d4edda; 
         border: 1px solid #c3e6cb;
         border-radius: 8px;
         padding: 15px;
@@ -73,13 +67,12 @@
         text-align: left;
     }
 
-    /* Nova Grade de Dados (Estilo Tabela/Lista) */
     .data-grid {
         text-align: left;
         margin-bottom: 30px;
         border: 1px solid #e9ecef;
         border-radius: 8px;
-        overflow: hidden; /* Para o border-radius funcionar */
+        overflow: hidden; 
     }
 
     .data-row {
@@ -87,11 +80,9 @@
         padding: 15px 20px;
         border-bottom: 1px solid #e9ecef;
     }
-        /* Remove a borda da última linha */
         .data-row:last-child {
             border-bottom: none;
         }
-        /* Linhas "zebradas" */
         .data-row:nth-of-type(odd) {
             background-color: #f8f9fa;
         }
@@ -99,7 +90,7 @@
     .data-label {
         font-weight: 600;
         color: var(--bank-dark);
-        flex-basis: 180px; /* Largura fixa para o "label" */
+        flex-basis: 180px; 
         flex-shrink: 0;
     }
 
@@ -107,7 +98,6 @@
         color: #556278;
     }
 
-    /* Botão de Voltar (usando classes de botão primário) */
     .btn-primary {
         background-color: var(--bank-primary);
         border-color: var(--bank-primary);

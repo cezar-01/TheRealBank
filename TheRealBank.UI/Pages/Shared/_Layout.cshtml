@@ -34,7 +34,6 @@
         .offcanvas-header{border-bottom:1px solid rgba(255,255,255,0.1);padding:1.5rem;}
         .offcanvas-title{font-weight:700;letter-spacing:-0.5px;}
         .offcanvas-body{padding:1.5rem;}
-        /* NOVO: força layout em coluna ocupando altura completa para poder empurrar ações */
         .offcanvas-body.layout-offcanvas-body{display:flex;flex-direction:column;min-height:100%;}
         .offcanvas-dark-link{color:rgba(255,255,255,0.7);font-weight:500;padding:1rem;border-radius:10px;transition:all .2s ease;text-decoration:none;display:flex;align-items:center;font-size:1.1rem;margin-bottom:5px;}
         .offcanvas-dark-link i{width:28px;margin-right:10px;color:var(--bank-primary);transition:transform .2s ease;}
@@ -42,10 +41,9 @@
         .offcanvas-dark-link:hover i{transform:scale(1.1);}
         .btn-area-cliente{background:var(--bank-primary)!important;color:#fff!important;font-weight:700!important;text-transform:uppercase;letter-spacing:1px;padding:15px;border-radius:10px;border:none;width:100%;display:flex;justify-content:center;align-items:center;box-shadow:0 4px 15px rgba(0,123,255,0.3);}
         .btn-area-cliente:hover{background:#0069d9!important;box-shadow:0 6px 20px rgba(0,123,255,0.5);transform:translateY(-2px);}
-        /* bloco de ações do usuário reposicionado mais para baixo */
         .user-actions{
-            margin-top:auto;      /* empurra para baixo */
-            margin-bottom:4.5rem; /* deixa um respiro acima do rodapé do offcanvas */
+            margin-top:auto;     
+            margin-bottom:4.5rem;
             padding:1.25rem 1rem;
             border:1px solid rgba(255,255,255,0.08);
             border-radius:14px;
@@ -91,6 +89,8 @@
             </div>
             <div class="offcanvas-body layout-offcanvas-body" style="min-height: 100%;">
                 <nav class="nav flex-column">
+                    <a asp-page="/Home/Inicio"><i class="fa-solid fa-user"></i> Portifolio</a>
+
                     <a class="offcanvas-dark-link" asp-page="/Index"><i class="fa-solid fa-house"></i> Home</a>
 
                     @if (!(User?.Identity?.IsAuthenticated ?? false))
@@ -108,7 +108,6 @@
                         </a>
                     }
                 </nav>
-                @* Qualquer usuário autenticado (Admin ou comum) vê Área do Cliente e Sair embaixo *@
                 @if (User?.Identity?.IsAuthenticated == true)
                 {
                     <div class="user-actions">

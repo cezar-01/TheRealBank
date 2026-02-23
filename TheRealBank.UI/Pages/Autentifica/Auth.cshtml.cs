@@ -18,7 +18,6 @@ namespace TheRealBank.UI.Pages.Autentifica
         [BindProperty]
         public InputModel Input { get; set; } = new();
 
-        // Classe para definir os campos do formulário
         public class InputModel
         {
             [Required(ErrorMessage = "O e-mail é obrigatório.")]
@@ -36,19 +35,12 @@ namespace TheRealBank.UI.Pages.Autentifica
         {
             if (!ModelState.IsValid) return Page();
 
-            // ==================================================================
-            // ÁREA DE VERIFICAÇÃO DE LOGIN (COM BANCO DE DADOS)
-            // ==================================================================
-            // Busca por e-mail
             var user = await _customers.GetByEmailAsync(Input.Email);
             if (user is null || user.Senha != Input.Password)
             {
                 ModelState.AddModelError(string.Empty, "E-mail ou senha inválidos.");
                 return Page();
             }
-            // ==================================================================
-
-            // Define role conforme flag Auth (admin) ou usuário comum
             var role = user.Auth ? "Admin" : "User";
 
             var claims = new[]
@@ -65,11 +57,9 @@ namespace TheRealBank.UI.Pages.Autentifica
                 new ClaimsPrincipal(identity),
                 new AuthenticationProperties { IsPersistent = true });
 
-            // Sucesso: redireciona para a página solicitada
             return RedirectToPage("/Experiencia/Layout");
         }
 
-        // Handler de Logout usado no formulário do layout
         public async Task<IActionResult> OnPostLogoutAsync()
         {
             await HttpContext.SignOutAsync();

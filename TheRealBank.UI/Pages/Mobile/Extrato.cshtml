@@ -2,12 +2,9 @@
 @model TheRealBank.UI.Pages.Mobile.ExtratoModel
 @{
     ViewData["Title"] = "Extrato";
-    // A LINHA "@Layout = null;" FOI REMOVIDA DAQUI.
 }
 
 <style>
-    /* Estilos base da sua página de Experiência */
-    /* A regra 'body' foi removida daqui */
 
     .experience {
         --purple: #5e00a3;
@@ -20,14 +17,13 @@
         display: flex;
         justify-content: center;
         padding: 16px 0;
-        /* background-color: silver; FOI REMOVIDO */
         min-height: calc(100vh - 56px);
     }
 
         .experience .mobile-frame {
             width: 375px;
             height: 812px;
-            background-color: var(--light-gray); /* Fundo da tela do app */
+            background-color: var(--light-gray); 
             border-radius: 40px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             position: relative;
@@ -213,7 +209,6 @@
                 font-weight: 500;
             }
 
-        /* --- NOVOS ESTILOS PARA O EXTRATO --- */
         .experience .filter-card {
             background-color: var(--white);
             border-radius: 12px;
@@ -241,7 +236,7 @@
                 background-color: var(--light-gray);
                 font-size: 14px;
                 font-weight: 500;
-                box-sizing: border-box; /* Garante que o padding não estoure a largura */
+                box-sizing: border-box; 
             }
 
             .experience .filter-card .btn-filtrar {
@@ -356,7 +351,6 @@
                     {
                         @foreach (var transacao in Model.Transacoes)
                         {
-                            // Usando suas classes .transaction-item, .debit, .credit
                             <a href="#" class="transaction-item @(transacao.Tipo == "Entrada" ? "credit" : "debit")">
                                 <div class="details">
                                     <div class="icon"><i class="@transacao.Icone"></i></div>

@@ -8,7 +8,6 @@ namespace TheRealBank.UI.Pages.Mobile.Pay
 
         public void OnGet()
         {
-            // Você pode carregar a chave PIX principal do usuário aqui
             MinhaChavePix = "123.456.789-00";
         }
     }

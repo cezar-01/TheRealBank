@@ -2,14 +2,11 @@
 @model TheRealBank.UI.Pages.Customers.EditarClienteModel
 @{
     ViewData["Title"] = "Editar Cliente";
-    Layout = "/Pages/Shared/_Layout.cshtml"; // CORRIGIDO: Aponta para o layout na pasta Shared
+    Layout = "/Pages/Shared/_Layout.cshtml"; 
 }
 
 <style>
-    /* * Este CSS é idêntico ao de 'AddCliente.cshtml' para manter a consistência.
-         * Ele usa as variáveis de cor (ex: --bank-dark, --bank-accent)
-         * que estão definidas no seu _Layout.cshtml.
-        */
+    
     .hero-section {
         background: linear-gradient(135deg, #f2f7fa 0%, #ffffff 100%);
         display: flex;
@@ -33,7 +30,6 @@
         animation: fadeInSlideUp 0.8s ease-out forwards;
     }
 
-    /* Animação de entrada */
     @@keyframes fadeInSlideUp {
         to {
             opacity: 1;
@@ -48,12 +44,12 @@
 
     .register-icon {
         font-size: 3rem;
-        color: var(--bank-accent); /* Cor Dourada de destaque */
+        color: var(--bank-accent); 
         margin-bottom: 15px;
     }
 
     .register-header h1 {
-        color: var(--bank-dark); /* Cor Azul Escura do título */
+        color: var(--bank-dark); 
         font-weight: 700;
         font-size: 2.2em;
         margin: 0;
@@ -77,14 +73,13 @@
         border: 1px solid #ced4da;
         transition: border-color 0.2s, box-shadow 0.2s;
     }
-        /* Campos desabilitados (como o CPF) */
         .form-control:disabled, .form-control[readonly] {
-            background-color: #e9ecef; /* Fundo cinza claro */
+            background-color: #e9ecef; 
             opacity: 1;
         }
 
         .form-control:focus {
-            border-color: var(--bank-primary); /* Azul de ação */
+            border-color: var(--bank-primary);
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
             outline: none;
         }
@@ -129,7 +124,6 @@
     <div class="register-container">
 
         <div class="register-header">
-            <!-- Ícone de "Editar Usuário" -->
             <i class="fa-solid fa-user-pen register-icon"></i>
             <h1>Editar Cliente</h1>
         </div>
@@ -137,7 +131,6 @@
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-            <!-- Campo oculto para garantir que o CPF/ID seja postado -->
             <input type="hidden" asp-for="Cliente.CPF" />
 
             <div class="form-group">
@@ -171,13 +164,11 @@
                 <span asp-validation-for="Cliente.Saldo" class="text-danger"></span>
             </div>
 
-            <!-- Botão de "Salvar" estilizado -->
             <button type="submit" class="btn btn-primary btn-lg w-100 mt-3">
                 <i class="fa-solid fa-save"></i>
                 Salvar Alterações
             </button>
 
-            <!-- Link de "Voltar" para a lista de clientes -->
             <a asp-page="/Customers/ExibirClientes" class="back-link">
                 <i class="fa-solid fa-arrow-left fa-xs"></i> Voltar para a Lista
             </a>

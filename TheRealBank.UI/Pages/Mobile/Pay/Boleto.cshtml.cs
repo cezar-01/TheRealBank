@@ -15,7 +15,7 @@ namespace TheRealBank.UI.Pages.Mobile.Pay
 
         public void OnGet()
         {
-            // Puxa o saldo (estou usando o valor do seu print)
+            // Puxa o saldo (estou usando o valor do  print)
             SaldoDisponivel = 1110473.88m;
         }
 
@@ -23,18 +23,10 @@ namespace TheRealBank.UI.Pages.Mobile.Pay
         {
             if (!ModelState.IsValid)
             {
-                // Se o formulário for inválido (código vazio),
-                // recarrega o saldo e mostra a página novamente com o erro.
                 OnGet();
                 return Page();
             }
 
-            // SE O CÓDIGO FOR VÁLIDO:
-            // 1. Valide o 'CodigoDeBarras' (verifique se tem 44 ou 48 dígitos, etc.)
-            // 2. Decodifique o valor e a data de vencimento
-            // 3. Redirecione para uma página de "Confirmação de Pagamento"
-
-            // Por enquanto, vamos apenas redirecionar
             return RedirectToPage("/Experiencia/Layout");
         }
     }

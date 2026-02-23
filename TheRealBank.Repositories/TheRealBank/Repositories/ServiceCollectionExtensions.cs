@@ -13,7 +13,7 @@ namespace TheRealBank.Repositories
             if (string.IsNullOrWhiteSpace(cs))
                 throw new InvalidOperationException("Connection string 'DefaultConnection' não encontrada.");
 
-            var versionText = configuration["Database:MySqlVersion"] ?? "8.0.36-mysql";
+            var versionText = configuration["MySqlVersion"] ?? "8.0.36-mysql";
 
             services.AddDbContext<MainContext>(options =>
                 options.UseMySql(cs, ServerVersion.Parse(versionText)));

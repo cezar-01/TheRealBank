@@ -6,26 +6,19 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Registra EF Core (MainContext) e Repositórios
 TheRealBank.Repositories.ExtensionMethods.AddDesignerRepositories(builder.Services, builder.Configuration);
 
-// Registra serviços de aplicação
 builder.Services.AddApplicationServices();
 
-// Razor Pages + Authorization conventions for Admin-only access
 builder.Services.AddRazorPages(options =>
 {
-    // Área do Cliente: somente autenticados
     options.Conventions.AuthorizePage("/Experiencia/Layout");
 
-    // Pasta Customers: somente Admin por padrão
     options.Conventions.AuthorizeFolder("/Customers", "AdminOnly");
 
-    // EXCEÇÃO: liberar AddCliente para qualquer um (anônimo)
     options.Conventions.AllowAnonymousToPage("/Customers/AddCliente");
 });
 
-// Auth Cookie + Policy de Admin
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(o =>
@@ -42,7 +35,6 @@ builder.Services.AddAuthorization(o =>
 
 var app = builder.Build();
 
-// Aplica migrações automaticamente (cria DB/tabelas se necessário)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<MainContext>();

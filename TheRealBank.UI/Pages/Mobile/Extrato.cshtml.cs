@@ -5,15 +5,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TheRealBank.UI.Pages.Mobile
 {
-    // Modelo para simular uma transação
     public class Transacao
     {
         public int Id { get; set; }
         public string Descricao { get; set; }
         public DateTime Data { get; set; }
         public decimal Valor { get; set; }
-        public string Tipo { get; set; } // "Entrada" ou "Saida"
-        public string Icone { get; set; } // Icone do Font Awesome
+        public string Tipo { get; set; } 
+        public string Icone { get; set; }
     }
 
     public class ExtratoModel : PageModel
@@ -35,7 +34,6 @@ namespace TheRealBank.UI.Pages.Mobile
 
         public ExtratoModel()
         {
-            // Popula os filtros de Mês e Ano
             Meses = new List<SelectListItem>
             {
                 new SelectListItem("Janeiro", "1"), new SelectListItem("Fevereiro", "2"),
@@ -59,8 +57,6 @@ namespace TheRealBank.UI.Pages.Mobile
             if (!Mes.HasValue) Mes = DateTime.Now.Month;
             if (!Ano.HasValue) Ano = DateTime.Now.Year;
 
-            // *** DADOS DE EXEMPLO ***
-            // (Substitua isso pela sua busca no banco de dados)
             var dadosDoBanco = new List<Transacao>
             {
                 new Transacao { Id = 1, Descricao = "Salário Empresa X", Data = new DateTime(2025, 11, 5), Valor = 5000.00m, Tipo = "Entrada", Icone = "fa-solid fa-briefcase" },
@@ -71,15 +67,13 @@ namespace TheRealBank.UI.Pages.Mobile
                 new Transacao { Id = 6, Descricao = "Depósito", Data = new DateTime(2024, 10, 20), Valor = 100.00m, Tipo = "Entrada", Icone = "fa-solid fa-download" },
             };
 
-            // Filtra os dados
             Transacoes = dadosDoBanco
                 .Where(t => t.Data.Month == Mes && t.Data.Year == Ano)
                 .OrderByDescending(t => t.Data)
                 .ToList();
 
-            // Calcula os totais
             TotalEntradas = Transacoes.Where(t => t.Tipo == "Entrada").Sum(t => t.Valor);
-            TotalSaidas = Transacoes.Where(t => t.Tipo == "Saida").Sum(t => t.Valor); // Já são negativos
+            TotalSaidas = Transacoes.Where(t => t.Tipo == "Saida").Sum(t => t.Valor);
             SaldoMes = TotalEntradas + TotalSaidas;
         }
     }

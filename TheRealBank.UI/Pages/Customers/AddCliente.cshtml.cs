@@ -25,7 +25,6 @@ namespace TheRealBank.UI.Pages.Customers
 
             await _customerService.AddCustomerAsync(Cliente);
 
-            // Após cadastro já autentica como usuário comum (Role=User)
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, Cliente.CPF ?? Cliente.Email ?? string.Empty),

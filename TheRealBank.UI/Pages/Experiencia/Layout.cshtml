@@ -18,7 +18,6 @@
 
     }
 
-    /* Variáveis e layout escopados para não interferir no _Layout */
     .experience {
         --purple: #5e00a3;
         --green: #00c66e;
@@ -50,7 +49,7 @@
             flex-grow: 1;
             overflow-y: auto;
             padding-bottom: 80px;
-            -webkit-overflow-scrolling: touch; /* Melhora a rolagem em dispositivos iOS */
+            -webkit-overflow-scrolling: touch;
         }
 
         .experience .status-bar {
@@ -93,7 +92,6 @@
         .experience section {
             margin-bottom: 20px;
         }
-        /* Adiciona espaçamento entre as seções */
 
         .experience .greeting {
             padding: 10px 0;
@@ -240,12 +238,12 @@
             border-radius: 12px;
             text-decoration: none;
             color: var(--dark-gray);
-            margin-bottom: 10px; /* Espaçamento entre os itens */
+            margin-bottom: 10px; 
             transition: transform 0.2s ease-in-out;
         }
 
             .experience .option-link:hover, .experience .transaction-item:hover, .experience .news-card:hover {
-                transform: translateY(-2px); /* Efeito sutil ao passar o mouse */
+                transform: translateY(-2px); 
             }
 
             .experience .option-link .icon-text, .experience .transaction-item .details {
@@ -287,11 +285,9 @@
             .experience .transaction-item.debit .amount {
                 color: #d9534f;
             }
-            /* Cor para despesas */
             .experience .transaction-item.credit .amount {
                 color: #5cb85c;
             }
-        /* Cor para receitas */
 
         .experience .news-card {
             flex-direction: column;

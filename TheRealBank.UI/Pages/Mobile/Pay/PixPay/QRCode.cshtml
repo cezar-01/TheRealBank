@@ -5,7 +5,6 @@
 }
 
 <style>
-    /* CSS BASE DO SEU APLICATIVO (COPIADO) */
     .experience {
         --purple: #5e00a3;
         --green: #00c66e;
@@ -126,9 +125,7 @@
                 font-weight: 500;
             }
 
-        /* --- NOVOS ESTILOS PARA A PÁGINA QR CODE --- */
 
-        /* Estilo das Abas (Pagar / Receber) */
         .experience .nav-tabs-creative {
             border-bottom: none;
             display: flex;
@@ -185,7 +182,6 @@
                 margin-bottom: 20px;
             }
 
-        /* Simulação da Câmera (Aba Pagar) */
         .experience .camera-viewfinder {
             width: 100%;
             max-width: 250px;
@@ -208,22 +204,8 @@
             box-shadow: 0 0 10px var(--green);
             animation: scan 3s linear infinite;
         }
-    /* Animação da linha de scan */
-    @@keyframes scan {
-        0% {
-            transform: translateY(0);
-        }
+    @@keyframes scan { 0% {transform: translateY(0);}50% {transform: translateY(247px); }100% { transform: translateY(0);} }
 
-        50% {
-            transform: translateY(247px);
-        }
-
-        100% {
-            transform: translateY(0);
-        }
-    }
-
-    /* Botões */
     .experience .btn-primary-full, .experience .btn-secondary-full {
         background-color: var(--purple);
         color: var(--white);
@@ -257,7 +239,6 @@
             transform: translateY(-2px);
         }
 
-    /* Display do QR Code (Aba Receber) */
     .experience .qr-code-display {
         padding: 15px;
         background-color: var(--white);

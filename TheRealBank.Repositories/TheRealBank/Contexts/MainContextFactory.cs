@@ -5,12 +5,11 @@ using Microsoft.Extensions.Configuration;
 
 namespace TheRealBank.Contexts
 {
-    // Force MySQL for design-time (migrations)
     public class MainContextFactory : IDesignTimeDbContextFactory<MainContext>
     {
         public MainContext CreateDbContext(string[] args)
         {
-            var basePath = Directory.GetCurrentDirectory(); // StartupProject (UI)
+            var basePath = Directory.GetCurrentDirectory(); 
             var config = new ConfigurationBuilder()
                 .SetBasePath(basePath)
                 .AddJsonFile("appsettings.json", optional: true)
@@ -22,7 +21,7 @@ namespace TheRealBank.Contexts
             var cs = config.GetConnectionString("DefaultConnection")
                      ?? config["ConnectionString"]
                      ?? "server=localhost;port=3306;user=root;password=admin;database=aaaa";
-            var versionText = config["Database:MySqlVersion"] ?? "8.0.36-mysql";
+            var versionText = config["MySqlVersion"] ?? "8.0.36-mysql";
 
             var options = new DbContextOptionsBuilder<MainContext>()
                 .UseMySql(cs, ServerVersion.Parse(versionText));

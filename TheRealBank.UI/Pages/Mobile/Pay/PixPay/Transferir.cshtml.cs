@@ -92,7 +92,7 @@ namespace TheRealBank.UI.Pages.Mobile.Pay
                     break;
             }
 
-            await OnGetAsync(); // atualiza saldo e contatos
+            await OnGetAsync(); 
             return Page();
         }
     }

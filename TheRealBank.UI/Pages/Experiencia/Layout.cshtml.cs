@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Globalization;
 using System.Threading.Tasks;
 using TheRealBank.Repositories.Users;
-using System.Security.Claims; // added
+using System.Security.Claims;
 
 namespace TheRealBank.UI.Pages.Experiencia
 {
@@ -19,14 +19,12 @@ namespace TheRealBank.UI.Pages.Experiencia
         public string FirstName { get; private set; } = "Cliente";
         public decimal Saldo { get; private set; } = 0m;
 
-        // Exibe saldo apenas para usuário comum (Role=User)
         public bool ShowBalance { get; private set; } = false;
 
         public async Task OnGetAsync([FromQuery] string? email)
         {
             var isAuthenticated = User?.Identity?.IsAuthenticated == true;
 
-            // Usa o e-mail da claim quando autenticado, senão o da query
             var effectiveEmail = string.IsNullOrWhiteSpace(email) && isAuthenticated
                 ? User.FindFirstValue(ClaimTypes.Email)
                 : email;
@@ -41,7 +39,6 @@ namespace TheRealBank.UI.Pages.Experiencia
             FirstName = GetFirstName(customer.Nome);
             Saldo = customer.Saldo;
 
-            // Somente usuários comuns veem o saldo
             ShowBalance = User.IsInRole("User");
         }
 

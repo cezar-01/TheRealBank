@@ -1,0 +1,476 @@
+﻿@page
+@model TheRealBank.UI.Pages.Home.InicioModel
+@{
+}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gabriel Spatial Portfolio</title>
+    <style>
+        :root {
+            --glass-bg: rgba(22, 22, 24, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --highlight: rgba(255, 255, 255, 0.2);
+            --accent-blue: #0a84ff;
+            --text-main: #f5f5f7;
+            --text-muted: #86868b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            height: 100vh;
+            overflow: hidden; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1200px; 
+        }
+
+       
+        .ambient-light {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: #050505;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: floatOrb 20s infinite ease-in-out alternate;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: #1c0f45;
+            top: -10%;
+            left: -10%;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: #0f2e45;
+            bottom: -10%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        .orb-3 {
+            width: 300px;
+            height: 300px;
+            background: #2e0f45;
+            top: 40%;
+            left: 40%;
+            animation-delay: -10s;
+        }
+
+        keyframes floatOrb {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate(50px, 50px) scale(1.1);
+            }
+        }
+
+       
+        .spatial-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 320px);
+            grid-template-rows: repeat(2, 280px);
+            gap: 24px;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        
+        .glass-card {
+            position: relative;
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 30px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            transform: translateZ(0);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+           
+            .glass-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.06), transparent 40%);
+                z-index: 0;
+                opacity: 0;
+                transition: opacity 0.4s;
+            }
+
+            .glass-card:hover::before {
+                opacity: 1;
+            }
+
+            .glass-card:hover {
+                transform: scale(1.02) translateZ(20px);
+                border-color: rgba(255,255,255,0.2);
+            }
+
+        
+        .card-summary {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: opacity 0.3s;
+        }
+
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-weight: 500;
+            font-size: 24px;
+            letter-spacing: -0.5px;
+        }
+
+        p.desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        .arrow {
+            font-size: 20px;
+            align-self: flex-end;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s;
+        }
+
+        .glass-card:hover .arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        
+        .card-details {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+            transition: all 0.4s 0.1s;
+            z-index: 3;
+            overflow-y: auto;
+        }
+
+       
+        .glass-card.active {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 80vw;
+            height: 80vh;
+            z-index: 100;
+            transform: translate(-50%, -50%) translateZ(100px) !important;
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8);
+            cursor: default;
+        }
+
+            .glass-card.active .card-summary {
+                opacity: 0;
+                pointer-events: none;
+            }
+
+            .glass-card.active .card-details {
+                opacity: 1;
+                pointer-events: auto;
+                transform: translateY(0);
+            }
+
+        .close-btn {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+            .close-btn:hover {
+                background: rgba(255,255,255,0.3);
+            }
+
+        body.has-active-card .glass-card:not(.active) {
+            filter: blur(10px) brightness(0.4);
+            transform: scale(0.9);
+            pointer-events: none;
+        }
+
+        .card-details h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-details h3 {
+            color: var(--accent-blue);
+            margin-top: 30px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .card-details ul {
+            list-style: none;
+        }
+
+        .card-details li {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tag {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-action {
+            display: inline-block;
+            margin-top: 40px;
+            padding: 12px 30px;
+            background: #fff;
+            color: #000;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+            .btn-action:hover {
+                transform: scale(1.05);
+            }
+
+    </style>
+</head>
+<body>
+
+    <div class="ambient-light">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="spatial-grid" id="grid">
+
+        <div class="glass-card" onclick="activateCard(this)">
+            <div class="card-summary">
+                <div>
+                    <div class="icon-box"></div>
+                    <h2>Gabriel Cezar</h2>
+                    <p class="desc">Intern Fullstack Developer<br>Especialista em .NET</p>
+                </div>
+                <span class="arrow">→</span>
+            </div>
+
+            <div class="card-details">
+                <button class="close-btn" onclick="event.stopPropagation(); closeCard(this)">✕</button>
+                <h1>Sobre Mim</h1>
+                <p style="font-size: 1.2rem; line-height: 1.6; max-width: 800px; color: #ccc;">
+                    Apaixonado por criar ecossistemas digitais. Atualmente focado em transformar problemas complexos em interfaces simples e elegantes. Minha filosofia é que o código deve ser tão limpo quanto o design.
+                </p>
+
+                <h3>Stack Principal</h3>
+                <ul>
+                    <li><span>C# / .NET 9</span> <span class="tag">Backend</span></li>
+                    <li><span>React & JS</span> <span class="tag">Frontend</span></li>
+                    <li><span>SQL & Railway</span> <span class="tag">Database</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="glass-card" onclick="activateCard(this)">
+            <div class="card-summary">
+                <div>
+                    <div class="icon-box" style="background: rgba(10, 132, 255, 0.2); color: #0a84ff;">🎓</div>
+                    <h2>Projetos</h2>
+                    <p class="desc">TheRealBank e Sistemas Web.<br>Acadêmico & Pessoal.</p>
+                </div>
+                <span class="arrow">→</span>
+            </div>
+
+            <div class="card-details">
+                <button class="close-btn" onclick="event.stopPropagation(); closeCard(this)">✕</button>
+                <h1>Acadêmico</h1>
+
+                <h3>Projeto Destaque: TheRealBank</h3>
+                <p>Um banco digital completo desenvolvido com as tecnologias mais recentes do mercado.</p>
+                <ul>
+                    <li>
+                        <span>Arquitetura MVC</span>
+                        <span class="tag">Estrutura</span>
+                    </li>
+                    <li>
+                        <span>Integração MySQL</span>
+                        <span class="tag">Dados</span>
+                    </li>
+                    <li>
+                        <span>Segurança (Identity)</span>
+                        <span class="tag">Auth</span>
+                    </li>
+                </ul>
+                <a href="#" class="btn-action">Ver no GitHub</a>
+            </div>
+        </div>
+
+        <div class="glass-card" onclick="activateCard(this)">
+            <div class="card-summary">
+                <div>
+                    <div class="icon-box" style="background: rgba(48, 209, 88, 0.2); color: #30d158;">🚀</div>
+                    <h2>PDI & Metas</h2>
+                    <p class="desc">Roadmap de carreira e<br>evolução técnica.</p>
+                </div>
+                <span class="arrow">→</span>
+            </div>
+
+            <div class="card-details">
+                <button class="close-btn" onclick="event.stopPropagation(); closeCard(this)">✕</button>
+                <h1>Plano de Carreira</h1>
+
+                <h3>Objetivos 2025</h3>
+                <ul>
+                    <li><span>Cloud Computing (AWS/Azure)</span> <span class="tag">Em andamento</span></li>
+                    <li><span>Inglês Fluente (C1)</span> <span class="tag">Prioridade</span></li>
+                    <li><span>Arquitetura de Microsserviços</span> <span class="tag">Estudo</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="glass-card" onclick="activateCard(this)">
+            <div class="card-summary">
+                <div>
+                    <div class="icon-box" style="background: rgba(191, 90, 242, 0.2); color: #bf5af2;">▶</div>
+                    <h2>Criador</h2>
+                    <p class="desc">Conteúdo em vídeo,<br>tutoriais e vlogs.</p>
+                </div>
+                <span class="arrow">→</span>
+            </div>
+
+            <div class="card-details">
+                <button class="close-btn" onclick="event.stopPropagation(); closeCard(this)">✕</button>
+                <h1>Canal YouTube</h1>
+                <p>Compartilhando a jornada de sair do zero ao Fullstack.</p>
+
+                <div style="margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px;">
+                        <strong>Último Vídeo</strong>
+                        <p style="font-size: 0.9rem; margin-top: 5px; color: #aaa;">Como configurar .NET 9 no VS Code</p>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px;">
+                        <strong>Playlist</strong>
+                        <p style="font-size: 0.9rem; margin-top: 5px; color: #aaa;">Diário de Estágio</p>
+                    </div>
+                </div>
+
+                <a href="https://youtube.com" target="_blank" class="btn-action" style="background: #ff0000; color: #fff;">Acessar Canal</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('mousemove', (e) => {
+            const grid = document.getElementById('grid');
+            const x = (window.innerWidth / 2 - e.pageX) / 25;
+            const y = (window.innerHeight / 2 - e.pageY) / 25;
+
+            grid.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+
+            document.querySelectorAll('.glass-card').forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${mouseX}px`);
+                card.style.setProperty('--mouse-y', `${mouseY}px`);
+            });
+        });
+
+        function activateCard(card) {
+            if (document.querySelector('.active')) return;
+
+            document.body.classList.add('has-active-card');
+            card.classList.add('active');
+        }
+
+        function closeCard(btn) {
+            const card = btn.closest('.glass-card');
+            card.classList.remove('active');
+
+            setTimeout(() => {
+                document.body.classList.remove('has-active-card');
+            }, 300);
+        }
+    </script>
+
+</body>
+</html>

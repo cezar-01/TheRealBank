@@ -2,13 +2,10 @@
 @model TheRealBank.UI.Pages.Customers.Excluir_ClienteModel
 @{
     ViewData["Title"] = "Excluir Cliente";
-    Layout = "/Pages/Shared/_Layout.cshtml"; // CORRIGIDO: Aponta para o layout correto
+    Layout = "/Pages/Shared/_Layout.cshtml"; 
 }
 
 <style>
-    /* * Este CSS usa as variáveis de cor (ex: --bank-dark, --bank-accent)
-         * que estão definidas no seu _Layout.cshtml
-        */
     .hero-section {
         background: linear-gradient(135deg, #f2f7fa 0%, #ffffff 100%);
         display: flex;
@@ -18,9 +15,8 @@
         padding: 40px 0;
     }
 
-    /* O card de confirmação */
     .confirm-container {
-        text-align: center; /* Centraliza o conteúdo do card */
+        text-align: center;
         background-color: white;
         padding: 40px 50px;
         border-radius: 16px;
@@ -33,7 +29,6 @@
         animation: fadeInSlideUp 0.8s ease-out forwards;
     }
 
-    /* Animação de entrada */
     @@keyframes fadeInSlideUp {
         to {
             opacity: 1;
@@ -46,15 +41,14 @@
         margin-bottom: 25px;
     }
 
-    /* Ícone de Perigo (Vermelho) */
     .confirm-icon {
         font-size: 3rem;
-        color: #dc3545; /* Cor de Perigo (Vermelho) */
+        color: #dc3545; 
         margin-bottom: 15px;
     }
 
     .confirm-header h1 {
-        color: var(--bank-dark); /* Cor Azul Escura do título */
+        color: var(--bank-dark); 
         font-weight: 700;
         font-size: 2.2em;
         margin: 0;
@@ -67,9 +61,8 @@
         margin-bottom: 25px;
     }
 
-    /* Bloco para mostrar os dados do cliente */
     .client-info {
-        background-color: #f8f9fa; /* Fundo cinza claro */
+        background-color: #f8f9fa; 
         border: 1px solid #e9ecef;
         border-radius: 8px;
         padding: 20px;
@@ -88,11 +81,11 @@
             font-size: 1.05em;
         }
 
-    /* Botões de Ação */
+   
     .action-buttons {
         display: flex;
         justify-content: center;
-        gap: 20px; /* Espaço entre os botões */
+        gap: 20px; 
     }
 
         .action-buttons .btn {
@@ -100,14 +93,13 @@
             font-size: 1.1em;
             padding: 12px 30px;
             border-radius: 8px;
-            min-width: 150px; /* Largura mínima para os botões */
+            min-width: 150px; 
         }
 
             .action-buttons .btn i {
                 margin-right: 8px;
             }
 
-    /* Botão de Perigo (Excluir) */
     .btn-danger {
         transition: all 0.3s ease;
     }
@@ -117,7 +109,6 @@
             box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
         }
 
-    /* Botão de Cancelar */
     .btn-outline-secondary {
         border-width: 2px;
         transition: all 0.3s ease;
@@ -139,19 +130,16 @@
 
         <p>Tem certeza que deseja excluir permanentemente o cliente abaixo? Esta ação não pode ser desfeita.</p>
 
-        <!-- Informações do cliente para confirmação -->
         <div class="client-info">
             <strong>@Model.Cliente.Nome</strong>
             <span>CPF: @Model.Cliente.CPF</span>
         </div>
 
         <div class="action-buttons">
-            <!-- Botão "Não" (Cancelar) - Link de volta para a lista -->
             <a class="btn btn-outline-secondary btn-lg" asp-page="/Customers/ExibirClientes">
                 <i class="fa-solid fa-xmark"></i> Não
             </a>
 
-            <!-- Botão "Sim" (Confirmar) - Form para executar o Post -->
             <form method="post" class="m-0">
                 <input type="hidden" asp-for="Cliente.CPF" />
                 <button type="submit" class="btn btn-danger btn-lg">

@@ -5,7 +5,6 @@
     Layout = "/Pages/Shared/_Layout.cshtml";
 }
 <style>
-    /* estilos existentes mantidos */
     .promote-btn {
         font-weight: 600;
     }
@@ -31,7 +30,6 @@
         }
     }
 
-    /* Cabeçalho com Título e Botão "Novo" */
     .list-header {
         display: flex;
         justify-content: space-between;
@@ -48,7 +46,7 @@
 
     .list-icon {
         font-size: 2.5rem;
-        color: var(--bank-accent); /* Cor Dourada */
+        color: var(--bank-accent); 
         margin-right: 15px;
     }
 
@@ -59,7 +57,6 @@
         margin: 0;
     }
 
-    /* Botão de Adicionar */
     .list-header .btn i {
         margin-right: 8px;
     }
@@ -70,14 +67,12 @@
         padding: 10px 20px;
     }
 
-    /* Estilo da Tabela */
     .table {
-        vertical-align: middle; /* Alinha o conteúdo das células verticalmente */
+        vertical-align: middle; 
     }
 
-        /* Cabeçalho da Tabela (Thead) */
         .table thead {
-            background-color: var(--bank-dark); /* Fundo escuro */
+            background-color: var(--bank-dark); 
             color: white;
         }
 
@@ -89,25 +84,23 @@
 
         .table td {
             padding: 1rem;
-            color: #556278; /* Texto da célula */
+            color: #556278; 
         }
 
     .table-striped > tbody > tr:nth-of-type(odd) > * {
-        --bs-table-accent-bg: #f9f9f9; /* Cor da linha listrada mais suave */
+        --bs-table-accent-bg: #f9f9f9; 
     }
 
-    /* Botões de Ação na Tabela */
     .action-buttons {
         display: flex;
-        gap: 10px; /* Espaço entre os botões */
+        gap: 10px; 
     }
 
         .action-buttons .btn i {
-            margin-right: 5px; /* Espaço entre ícone e texto */
+            margin-right: 5px; 
         }
     .promote-btn { font-weight:600; }
     .demote-btn  { font-weight:600; }
-    /* restante dos estilos existentes mantidos */
 </style>
 
 <div class="list-container">
@@ -160,7 +153,6 @@
                                     <i class="fa-solid fa-trash-can"></i> Excluir
                                 </a>
 
-                                @* Promover (se não for admin) *@
                                 @if (!cliente.Auth && User.IsInRole("Admin"))
                                 {
                                     <form method="post" asp-page-handler="Promote" asp-route-cpf="@cliente.CPF" class="d-inline">
@@ -170,7 +162,6 @@
                                     </form>
                                 }
 
-                                @* Rebaixar (se for admin, outro usuário, e você é admin) *@
                                 @if (cliente.Auth && User.IsInRole("Admin") && cliente.Email != User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value)
                                 {
                                     <form method="post" asp-page-handler="Demote" asp-route-cpf="@cliente.CPF" class="d-inline">

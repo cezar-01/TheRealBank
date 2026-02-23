@@ -2,13 +2,10 @@
 @model TheRealBank.UI.Pages.Customers.AddClienteModel
 @{
     ViewData["Title"] = "Cadastro de Cliente";
-    Layout = "/Pages/Shared/_Layout.cshtml"; // AQUI ESTÁ A CORREÇÃO: Caminho completo para o layout
+    Layout = "/Pages/Shared/_Layout.cshtml"; 
 }
 
 <style>
-    /* * Este CSS usa as variáveis de cor (ex: --bank-dark, --bank-accent)
-         * que estão definidas no seu _Layout.cshtml
-        */
     .hero-section {
         background: linear-gradient(135deg, #f2f7fa 0%, #ffffff 100%);
         display: flex;
@@ -19,20 +16,19 @@
     }
 
     .register-container {
-        text-align: left; /* Formulários ficam melhores alinhados à esquerda */
+        text-align: left;
         background-color: white;
         padding: 40px 50px;
         border-radius: 16px;
         box-shadow: 0 15px 40px rgba(0,0,0,0.08);
         border: 1px solid #e0e8f0;
-        max-width: 600px; /* Um pouco maior para um formulário */
+        max-width: 600px; 
         width: 90%;
         opacity: 0;
         transform: translateY(20px);
         animation: fadeInSlideUp 0.8s ease-out forwards;
     }
 
-    /* Animação de entrada */
     @@keyframes fadeInSlideUp {
         to {
             opacity: 1;
@@ -47,18 +43,17 @@
 
     .register-icon {
         font-size: 3rem;
-        color: var(--bank-accent); /* Cor Dourada de destaque */
+        color: var(--bank-accent); 
         margin-bottom: 15px;
     }
 
     .register-header h1 {
-        color: var(--bank-dark); /* Cor Azul Escura do título */
+        color: var(--bank-dark); 
         font-weight: 700;
         font-size: 2.2em;
         margin: 0;
     }
 
-    /* Estilizando os campos do Bootstrap */
     .form-group {
         margin-bottom: 20px;
     }
@@ -78,14 +73,12 @@
         transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-        /* Destaque ao focar no campo */
         .form-control:focus {
-            border-color: var(--bank-primary); /* Azul de ação */
+            border-color: var(--bank-primary); 
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
             outline: none;
         }
 
-    /* Estilo para o botão de submit (usando classes Bootstrap + ícone) */
     .btn-primary {
         background-color: var(--bank-primary);
         border-color: var(--bank-primary);

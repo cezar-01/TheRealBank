@@ -27,7 +27,6 @@ namespace TheRealBank.UI.Pages.Customers
             return Page();
         }
 
-        // MELHORIA: O parâmetro aqui deve corresponder ao da rota (@page "{CPF}") para clareza
         public async Task<IActionResult> OnPostAsync()
         {
             if (Cliente == null || string.IsNullOrEmpty(Cliente.CPF))
