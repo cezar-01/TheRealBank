@@ -1,0 +1,32 @@
+# TheRealBank - stack para rodar na VM (EC2) da AWS
+#   - app    : a aplicacao ASP.NET (.NET 9), buildada pelo Dockerfile do repo
+#   - ollama : o servidor de IA local (chat), na mesma VM
+# O banco de dados (MySQL) fica no Railway (externo) -> ver DB_CONNECTION no .env
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+
+  app:
+    build: .
+    container_name: therealbank
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    environment:
+      # Porta interna do ASP.NET (.NET 9)
+      - ASPNETCORE_URLS=http://+:8080
+      # Banco MySQL no Railway (vem do arquivo .env, endereco PUBLICO .proxy.rlwy.net)
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION}
+      # IA: aponta para o servico ollama na mesma rede do compose
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=phi3:mini
+    ports:
+      # acesso publico: http://<IP-PUBLICO-DA-VM>/  -> container na 8080
+      - "80:8080"
+
+volumes:
+  ollama_data:
