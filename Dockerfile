@@ -14,8 +14,9 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Libera a porta 80 (HTTP)
-EXPOSE 80
+# Garante que o ASP.NET escute na 8080 (padrao do .NET 9), em todas as interfaces
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
 
 # Comando para iniciar o site
 ENTRYPOINT ["dotnet", "TheRealBank.UI.dll"]
