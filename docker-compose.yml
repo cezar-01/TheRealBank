@@ -1,14 +1,23 @@
 # TheRealBank - stack para rodar na VM (EC2) da AWS
-#   - app    : a aplicacao ASP.NET (.NET 9), buildada pelo Dockerfile do repo
+#   - caddy  : porta de entrada (portas 80/443). Faz HTTPS automatico (Let's Encrypt)
+#              para o dominio e repassa o trafego para o app.
+#   - app    : a aplicacao ASP.NET (.NET 9), buildada pelo Dockerfile do repo (porta interna 8080)
 #   - ollama : o servidor de IA local (chat), na mesma VM
-# O banco de dados (MySQL) fica no Railway (externo) -> ver DB_CONNECTION no .env
+# Banco de dados (MySQL) fica no Railway (externo) -> ver DB_CONNECTION no .env
 services:
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ollama
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
     restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"     # HTTP  (Caddy usa para validar o certificado e redirecionar p/ HTTPS)
+      - "443:443"   # HTTPS (onde o site publico responde)
     volumes:
-      - ollama_data:/root/.ollama
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
 
   app:
     build: .
@@ -17,16 +26,26 @@ services:
     depends_on:
       - ollama
     environment:
-      # Porta interna do ASP.NET (.NET 9)
+      # Porta interna do ASP.NET (.NET 9). Nao publica no host: o Caddy fala com ela pela rede interna.
       - ASPNETCORE_URLS=http://+:8080
-      # Banco MySQL no Railway (vem do arquivo .env, endereco PUBLICO .proxy.rlwy.net)
+      # Faz o app confiar nos cabecalhos do proxy (Caddy) -> sabe que a requisicao veio por HTTPS
+      - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+      # Banco MySQL no Railway (vem do .env, host PUBLICO .proxy.rlwy.net)
       - ConnectionStrings__DefaultConnection=${DB_CONNECTION}
       # IA: aponta para o servico ollama na mesma rede do compose
       - OLLAMA_BASE_URL=http://ollama:11434
       - OLLAMA_MODEL=phi3:mini
-    ports:
-      # acesso publico: http://<IP-PUBLICO-DA-VM>/  -> container na 8080
-      - "80:8080"
+    expose:
+      - "8080"   # visivel so para os outros containers, nao para a internet
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
 
 volumes:
+  caddy_data:
+  caddy_config:
   ollama_data:

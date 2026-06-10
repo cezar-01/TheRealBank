@@ -1,0 +1,14 @@
+# Caddy: HTTPS automatico para o dominio e repasse para o app na porta 8080.
+# Requisitos para o certificado funcionar:
+#   1) O dominio precisa ter um registro A apontando para o IP PUBLICO da VM.
+#   2) As portas 80 e 443 da VM precisam estar abertas (Security Group da AWS).
+# Caddy entao obtem o certificado Let's Encrypt sozinho no primeiro acesso.
+
+pgmais-gabriel-docker.com.br {
+    reverse_proxy app:8080
+}
+
+# Se voce tambem criar um registro A para "www", descomente o bloco abaixo:
+# www.pgmais-gabriel-docker.com.br {
+#     redir https://pgmais-gabriel-docker.com.br{uri}
+# }
